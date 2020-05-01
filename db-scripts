@@ -1,0 +1,6 @@
+CREATE TABLE knowledge_item (
+  id INTEGER PRIMARY KEY,
+  created_ts INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL
+);
