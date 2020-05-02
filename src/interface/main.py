@@ -40,4 +40,5 @@ def draw_screen(stdscr):
 def main():
     curses.wrapper(draw_screen)
 
-main()
+if __name__ == '__main__':
+  main()
