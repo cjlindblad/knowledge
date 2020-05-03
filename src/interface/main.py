@@ -1,4 +1,5 @@
 import curses
+from curses.textpad import Textbox, rectangle
 from knowledge_service import KnowledgeService
 from enum import Enum
 
@@ -7,11 +8,18 @@ class ScreenState(Enum):
     ITEM = 2
 
 def draw_screen(stdscr):
+    """This one screams for refactoring,
+    but I'm going to play around just for a bit longer""" 
+    # constants
+    LIST_TOP_MARGIN = 2
+
     # members
     knowledge_service = KnowledgeService()
     k = 0
     menu_index = 0
     screen_state = ScreenState.LIST
+    edit_window = curses.newwin(1, 30, 0, 2)
+    search_term = ''
 
     # inital blank screen
     curses.curs_set(False)
@@ -35,24 +43,34 @@ def draw_screen(stdscr):
         elif k ==  ord('b'):
             if screen_state == ScreenState.ITEM:
                 screen_state = ScreenState.LIST
+        else:
+            if screen_state == ScreenState.LIST and k:
+                search_term = search_term + chr(k)
 
+        # clear screen
         stdscr.clear()
 
         # render functions
         if (screen_state == ScreenState.LIST):
+            # render list
             for i, item in enumerate(data):
                 attribute = curses.A_NORMAL
                 if menu_index == i:
                     attribute = curses.A_REVERSE
-                stdscr.addstr(i, 0, f'{item.created} {item.title}', attribute)
+                stdscr.addstr(LIST_TOP_MARGIN + i, 0, f'{item.created} {item.title}', attribute)
+            # render prompt
+            stdscr.addstr(0, 0, f'> {search_term}')
         elif (screen_state == ScreenState.ITEM):
+            # render item content
             item = data[menu_index]
             lines = item.content.splitlines()
             for i, line in enumerate(lines):
                 stdscr.addstr(i, 0, line)
 
+        # paint
         stdscr.refresh()
 
+        # wait for input
         k = stdscr.getch()
 
 def main():
