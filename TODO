@@ -1,0 +1,7 @@
+Main
+- Filter list based on prompt
+
+Polish
+- Keep track of main window's width and height
+- Don't allow prompt input on more than one line
+- Don't allow non textual prompt input, like arrow key codes
