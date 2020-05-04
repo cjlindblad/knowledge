@@ -1,4 +1,5 @@
 import sqlite3
+import re
 from datetime import datetime
 
 from knowledge_item import KnowledgeItem
@@ -27,7 +28,7 @@ class KnowledgeService:
 
         if search_term:
             # filter result
-            knowledge = [item for item in knowledge if search_term in
-                    item.title] 
+            knowledge = [item for item in knowledge if re.search(search_term,
+                item.title, re.IGNORECASE)] 
 
         return knowledge
