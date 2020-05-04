@@ -29,7 +29,7 @@ def draw_screen(stdscr):
     # main loop
     while (k != ord('q')):
         # ask for data
-        data = knowledge_service.list_knowledge()
+        data = knowledge_service.list_knowledge(search_term)
         if menu_index > len(data) - 1:
             menu_index = len(data) - 1
 

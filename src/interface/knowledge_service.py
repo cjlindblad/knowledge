@@ -4,7 +4,7 @@ from datetime import datetime
 from knowledge_item import KnowledgeItem
 
 class KnowledgeService:
-    def list_knowledge(self):
+    def list_knowledge(self, search_term):
         connection = sqlite3.connect('../../db/knowledge.db')
         cursor = connection.cursor()
 
@@ -24,5 +24,10 @@ class KnowledgeService:
             ))
 
         connection.close()
+
+        if search_term:
+            # filter result
+            knowledge = [item for item in knowledge if search_term in
+                    item.title] 
 
         return knowledge
