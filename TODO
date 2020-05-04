@@ -1,7 +1,6 @@
 Main
 - Filter list based on prompt
     - Handle weird re behaviour (search for '[]')
-    - Typing 'cse' should'nt match 'CSS'
     - Match words out of order
 
 Polish

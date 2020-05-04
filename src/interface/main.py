@@ -28,11 +28,6 @@ def draw_screen(stdscr):
 
     # main loop
     while (k != ord('q')):
-        # ask for data
-        data = knowledge_service.list_knowledge(search_term)
-        if menu_index > len(data) - 1:
-            menu_index = len(data) - 1
-
         # key listeners
         if k == curses.KEY_UP and menu_index > 0 and screen_state == ScreenState.LIST:
             menu_index = menu_index - 1
@@ -46,6 +41,11 @@ def draw_screen(stdscr):
         else:
             if screen_state == ScreenState.LIST and k:
                 search_term = search_term + chr(k)
+
+        # ask for data
+        data = knowledge_service.list_knowledge(search_term)
+        if menu_index > len(data) - 1:
+            menu_index = len(data) - 1
 
         # clear screen
         stdscr.clear()
