@@ -5,7 +5,7 @@ from datetime import datetime
 from knowledge_item import KnowledgeItem
 
 class KnowledgeService:
-    def list_knowledge(self, search_term):
+    def list_knowledge(self, search_string):
         connection = sqlite3.connect('../../db/knowledge.db')
         cursor = connection.cursor()
 
@@ -26,10 +26,14 @@ class KnowledgeService:
 
         connection.close()
 
-        if search_term:
+        if search_string:
             # filter result
+            terms = [re.escape(word) for word in search_string.split()]
+            # (?=.*word)
+            regex_terms = [f'(?=.*{term})' for term in terms]
+            regex = f'{"".join(regex_terms)}.*'
             knowledge = [item for item in knowledge if
-                    re.search(re.escape(search_term),
+                    re.search(regex,
                 item.title, re.IGNORECASE)] 
 
         return knowledge
