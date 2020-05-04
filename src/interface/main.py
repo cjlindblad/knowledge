@@ -28,22 +28,23 @@ def draw_screen(stdscr):
 
     # main loop
     while (k != ord('q')):
-        # key listeners
-        if k == curses.KEY_UP and menu_index > 0 and screen_state == ScreenState.LIST:
-            menu_index = menu_index - 1
-        elif k == curses.KEY_DOWN and menu_index < len(data) - 1 and screen_state == ScreenState.LIST:
-            menu_index = menu_index + 1
-        elif k == curses.KEY_ENTER or k == 10 or k == 13:
-            screen_state = ScreenState.ITEM
-        elif k ==  ord('b'):
-            if screen_state == ScreenState.ITEM:
+        # key listeners for list screen state
+        if screen_state == ScreenState.LIST:
+            if k == curses.KEY_UP and menu_index > 0:
+                menu_index = menu_index - 1
+            if k == curses.KEY_DOWN and menu_index < len(data) - 1:
+                menu_index = menu_index + 1
+            if k in (curses.KEY_ENTER, 10, 13):
+                screen_state = ScreenState.ITEM
+            if k and curses.ascii.isprint(chr(k)):
+                search_term = search_term + chr(k)
+            if k in (curses.KEY_BACKSPACE, 127):
+                search_term = search_term[:-1]
+
+        # key listeners for item screen state
+        if screen_state == ScreenState.ITEM:
+            if k == ord('b'):
                 screen_state = ScreenState.LIST
-        else:
-            if screen_state == ScreenState.LIST and k:
-                if curses.ascii.isprint(chr(k)):
-                    search_term = search_term + chr(k)
-                if k == curses.KEY_BACKSPACE or k == 127:
-                    search_term = search_term[:-1]
 
         # ask for data
         data = knowledge_service.list_knowledge(search_term)
