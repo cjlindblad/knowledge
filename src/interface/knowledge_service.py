@@ -28,7 +28,8 @@ class KnowledgeService:
 
         if search_term:
             # filter result
-            knowledge = [item for item in knowledge if re.search(search_term,
+            knowledge = [item for item in knowledge if
+                    re.search(re.escape(search_term),
                 item.title, re.IGNORECASE)] 
 
         return knowledge

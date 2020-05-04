@@ -1,6 +1,5 @@
 Main
 - Filter list based on prompt
-    - Handle weird re behaviour (search for '[]')
     - Match words out of order
 
 Polish
