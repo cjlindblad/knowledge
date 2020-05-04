@@ -40,7 +40,10 @@ def draw_screen(stdscr):
                 screen_state = ScreenState.LIST
         else:
             if screen_state == ScreenState.LIST and k:
-                search_term = search_term + chr(k)
+                if curses.ascii.isprint(chr(k)):
+                    search_term = search_term + chr(k)
+                if k == curses.KEY_BACKSPACE or k == 127:
+                    search_term = search_term[:-1]
 
         # ask for data
         data = knowledge_service.list_knowledge(search_term)
