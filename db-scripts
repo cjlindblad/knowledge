@@ -1,10 +1,19 @@
 # create DB
 sqlite3 knowledge.db
 
-# create inital table
+# create knowledge item category table
+CREATE TABLE category (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL
+);
+
+# create knowledge item table
 CREATE TABLE knowledge_item (
   id INTEGER PRIMARY KEY,
   created_ts INTEGER NOT NULL,
   title TEXT NOT NULL,
-  content TEXT NOT NULL
+  content TEXT NOT NULL,
+  category_id INTEGER NULL,
+  FOREIGN KEY (category_id) REFERENCES category(id)
 );
+

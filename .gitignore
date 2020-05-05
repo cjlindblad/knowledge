@@ -3,3 +3,5 @@ db
 # python
 __pycache__/
 *.py[cod]
+*.py.swp
+

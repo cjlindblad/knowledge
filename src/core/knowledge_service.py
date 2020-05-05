@@ -10,18 +10,21 @@ class KnowledgeService:
         cursor = connection.cursor()
 
         query = '''
-        SELECT * FROM knowledge_item
-        ORDER BY created_ts DESC;
+        SELECT ki.created_ts as created, ki.title, ki.content, c.name as category
+        FROM knowledge_item ki
+        JOIN category c ON c.id = ki.category_id
+        ORDER BY ki.created_ts DESC;
         '''
 
         knowledge = []
 
         result = cursor.execute(query)
-        for id, created, title, content in result:
+        for created, title, content, category in result:
             knowledge.append(KnowledgeItem(
                 datetime.utcfromtimestamp(created).strftime('%Y-%m-%d'),
                 title,
-                content
+                content,
+                category
             ))
 
         connection.close()
@@ -34,6 +37,6 @@ class KnowledgeService:
             regex = f'{"".join(regex_terms)}.*'
             knowledge = [item for item in knowledge if
                     re.search(regex,
-                item.title, re.IGNORECASE)] 
+                f'{item.category} {item.title}', re.IGNORECASE)] 
 
         return knowledge
