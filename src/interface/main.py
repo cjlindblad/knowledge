@@ -48,7 +48,9 @@ def draw_screen(stdscr):
 
         # ask for data
         data = knowledge_service.list_knowledge(search_term)
-        if menu_index > len(data) - 1:
+        if len(data) == 0:
+            menu_index = 0
+        elif menu_index > len(data) - 1:
             menu_index = len(data) - 1
 
         # clear screen

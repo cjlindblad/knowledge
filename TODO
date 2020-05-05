@@ -1,5 +1,10 @@
-Main
-
-Polish
+TODO
+- List pagination
+- Status bar ('page 1 of X')
 - Keep track of main window's width and height
 - Don't allow prompt input on more than one line
+- Backup to and from text files
+- Categories
+- Enter (?=word.*) regex as knowledge item
+- __init__.py files
+
