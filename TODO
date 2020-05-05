@@ -6,5 +6,4 @@ TODO
 - Backup to and from text files
 - Categories
 - Enter (?=word.*) regex as knowledge item
-- __init__.py files
-
+- db config (path in env?)

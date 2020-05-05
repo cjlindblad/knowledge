@@ -1,6 +1,6 @@
 import curses
 from curses.textpad import Textbox, rectangle
-from knowledge_service import KnowledgeService
+from src.core.knowledge_service import KnowledgeService
 from enum import Enum
 
 class ScreenState(Enum):

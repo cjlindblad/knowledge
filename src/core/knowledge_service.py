@@ -2,11 +2,11 @@ import sqlite3
 import re
 from datetime import datetime
 
-from knowledge_item import KnowledgeItem
+from src.core.knowledge_item import KnowledgeItem
 
 class KnowledgeService:
     def list_knowledge(self, search_string):
-        connection = sqlite3.connect('../../db/knowledge.db')
+        connection = sqlite3.connect('./db/knowledge.db')
         cursor = connection.cursor()
 
         query = '''
