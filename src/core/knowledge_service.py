@@ -12,7 +12,7 @@ class KnowledgeService:
         query = '''
         SELECT ki.created_ts as created, ki.title, ki.content, c.name as category
         FROM knowledge_item ki
-        JOIN category c ON c.id = ki.category_id
+        LEFT JOIN category c ON c.id = ki.category_id
         ORDER BY ki.created_ts DESC;
         '''
 

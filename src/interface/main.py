@@ -64,7 +64,7 @@ def draw_screen(stdscr):
                 if menu_index == i:
                     attribute = curses.A_REVERSE
                 stdscr.addstr(LIST_TOP_MARGIN + i, 0,
-                    f'{item.category.upper()} | {item.title} ({item.created})', attribute)
+                    f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
             # render prompt
             stdscr.addstr(0, 0, f'> {search_term}')
         elif (screen_state == ScreenState.ITEM):
