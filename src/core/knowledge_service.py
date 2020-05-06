@@ -5,7 +5,7 @@ from datetime import datetime
 from src.core.knowledge_item import KnowledgeItem
 
 class KnowledgeService:
-    def list_knowledge(self, search_string):
+    def list_knowledge(self, search_string=''):
         connection = sqlite3.connect('./db/knowledge.db')
         cursor = connection.cursor()
 
