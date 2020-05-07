@@ -18,6 +18,8 @@ def draw_screen(stdscr):
     screen_state = ScreenState.LIST
     edit_window = curses.newwin(1, 30, 0, 2)
     search_term = ''
+    current_page = 0
+    pages = 1
 
     # inital blank screen
     curses.curs_set(False)
@@ -25,8 +27,12 @@ def draw_screen(stdscr):
     stdscr.refresh()
     
     # constants
-    LIST_TOP_MARGIN = 2
+    LIST_TOP_MARGIN = 1
     WIN_HEIGHT, WIN_WIDTH = stdscr.getmaxyx()
+    STATUS_BAR_HEIGHT = 1
+    LIST_START = LIST_TOP_MARGIN
+    LIST_END = WIN_HEIGHT - 1 - STATUS_BAR_HEIGHT
+    PAGE_LENGTH = WIN_HEIGHT - LIST_TOP_MARGIN - STATUS_BAR_HEIGHT
 
     # main loop
     while (k != ord('q')):
@@ -50,10 +56,15 @@ def draw_screen(stdscr):
 
         # ask for data
         data = knowledge_service.list_knowledge(search_term)
+        pages = (len(data) // PAGE_LENGTH) + 1
         if len(data) == 0:
             menu_index = 0
         elif menu_index > len(data) - 1:
             menu_index = len(data) - 1
+
+        current_page = (menu_index) // PAGE_LENGTH
+        list_start = current_page * PAGE_LENGTH
+        list_end = list_start + PAGE_LENGTH
 
         # clear screen
         stdscr.clear()
@@ -61,12 +72,14 @@ def draw_screen(stdscr):
         # render functions
         if (screen_state == ScreenState.LIST):
             # render list
-            for i, item in enumerate(data):
+            for i, item in enumerate(data[list_start:list_end + 1]):
                 attribute = curses.A_NORMAL
-                if menu_index == i:
+                if menu_index % PAGE_LENGTH == i:
                     attribute = curses.A_REVERSE
-                stdscr.addstr(LIST_TOP_MARGIN + i, 0,
-                    f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
+                y_position = i + LIST_TOP_MARGIN
+                if y_position >= LIST_START and y_position <= LIST_END:
+                    stdscr.addstr(LIST_TOP_MARGIN + i, 0,
+                        f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
             # render prompt
             stdscr.addstr(0, 0, f'> {search_term}')
         elif (screen_state == ScreenState.ITEM):
@@ -77,7 +90,7 @@ def draw_screen(stdscr):
                 stdscr.addstr(i, 0, line)
 
         # render status bar
-        stdscr.addstr(WIN_HEIGHT - 1, 0, f'Page 1 / 1 ')
+        stdscr.addstr(WIN_HEIGHT - 1, 0, f'Page {current_page + 1} / {pages}')
 
         # paint
         stdscr.refresh()
