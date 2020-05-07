@@ -10,8 +10,6 @@ class ScreenState(Enum):
 def draw_screen(stdscr):
     """This one screams for refactoring,
     but I'm going to play around just for a bit longer""" 
-    # constants
-    LIST_TOP_MARGIN = 2
 
     # members
     knowledge_service = KnowledgeService()
@@ -25,6 +23,10 @@ def draw_screen(stdscr):
     curses.curs_set(False)
     stdscr.clear()
     stdscr.refresh()
+    
+    # constants
+    LIST_TOP_MARGIN = 2
+    WIN_HEIGHT, WIN_WIDTH = stdscr.getmaxyx()
 
     # main loop
     while (k != ord('q')):
@@ -73,6 +75,9 @@ def draw_screen(stdscr):
             lines = item.content.splitlines()
             for i, line in enumerate(lines):
                 stdscr.addstr(i, 0, line)
+
+        # render status bar
+        stdscr.addstr(WIN_HEIGHT - 1, 0, f'Page 1 / 1 ')
 
         # paint
         stdscr.refresh()
