@@ -1,8 +1,5 @@
 TODO
 - List search term highlighting
-- List pagination
-- Status bar ('page 1 of X')
-- Keep track of main window's width and height
 - Don't allow prompt input on more than one line
-- Backup to and from text files
 - db config (path in env?)
+- Return errors to shell
