@@ -5,4 +5,4 @@ backups
 __pycache__/
 *.py[cod]
 *.py.swp
-
+venv
