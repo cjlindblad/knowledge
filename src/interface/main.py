@@ -50,7 +50,7 @@ class Display:
         PAGE_LENGTH = WIN_HEIGHT - LIST_TOP_MARGIN - STATUS_BAR_HEIGHT
 
         # main loop
-        while (k != ord('q')):
+        while (True):
             # key listeners for list screen state
             if screen_state == ScreenState.LIST:
                 if k == curses.KEY_UP and menu_index > 0:
@@ -63,6 +63,8 @@ class Display:
                     search_term = search_term + chr(k)
                 if k in (curses.KEY_BACKSPACE, 127):
                     search_term = search_term[:-1]
+                if curses.keyname(k) == b'^A':
+                    search_term = 'add functionality needed!'
 
             # key listeners for item screen state
             if screen_state == ScreenState.ITEM:
