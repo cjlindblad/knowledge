@@ -4,13 +4,3 @@ class KnowledgeItem:
         self.title = title
         self.content = content
         self.category = category
-
-    def as_dict(self):
-        dict = {
-            'created': self.created,
-            'title': self.title,
-            'content': self.content,
-            'category': self.category
-        }
-
-        return dict
