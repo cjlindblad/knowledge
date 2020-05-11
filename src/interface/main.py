@@ -1,6 +1,7 @@
 import curses
 from curses.textpad import Textbox, rectangle
 from src.core.knowledge_service import KnowledgeService
+from src.interface.editor_callout import get_text_from_editor
 from enum import Enum
 
 
@@ -12,15 +13,26 @@ class ScreenState(Enum):
 class Display:
     def __init__(self):
         self.stdscr = curses.initscr()
+        self.__setup()
+
+    def __del__(self):
+        self.__teardown()
+        curses.endwin()
+
+    def __setup(self):
         curses.noecho()
         curses.cbreak()
         self.stdscr.keypad(True)
 
-    def __del__(self):
+        # inital blank screen
+        curses.curs_set(False)
+        self.stdscr.clear()
+        self.stdscr.refresh()
+
+    def __teardown(self):
         curses.nocbreak()
         self.stdscr.keypad(False)
         curses.echo()
-        curses.endwin()
 
     def draw_screen(self):
         """This one screams for refactoring,
@@ -35,11 +47,6 @@ class Display:
         current_page = 0
         pages = 1
         data = []
-
-        # inital blank screen
-        curses.curs_set(False)
-        self.stdscr.clear()
-        self.stdscr.refresh()
 
         # constants
         LIST_TOP_MARGIN = 1
@@ -64,7 +71,9 @@ class Display:
                 if k in (curses.KEY_BACKSPACE, 127):
                     search_term = search_term[:-1]
                 if curses.keyname(k) == b'^A':
-                    search_term = 'add functionality needed!'
+                    text = get_text_from_editor()
+                    self.__setup()
+                    search_term = text
 
             # key listeners for item screen state
             if screen_state == ScreenState.ITEM:

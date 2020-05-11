@@ -3,3 +3,7 @@ TODO
 - Don't allow prompt input on more than one line
 - db config (path in env?)
 - Return errors to shell
+
+BUGS
+- Pressing enter on empty list
+- When returning from vim, cursor appears in status menu
