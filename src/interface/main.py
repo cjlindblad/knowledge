@@ -12,27 +12,30 @@ class ScreenState(Enum):
 
 class Display:
     def __init__(self):
-        self.stdscr = curses.initscr()
         self.__setup()
 
     def __del__(self):
         self.__teardown()
-        curses.endwin()
 
     def __setup(self):
+        self.stdscr = curses.initscr()
+
         curses.noecho()
         curses.cbreak()
         self.stdscr.keypad(True)
 
         # inital blank screen
-        curses.curs_set(False)
+        curses.curs_set(0)
         self.stdscr.clear()
         self.stdscr.refresh()
+
 
     def __teardown(self):
         curses.nocbreak()
         self.stdscr.keypad(False)
         curses.echo()
+
+        curses.endwin()
 
     def draw_screen(self):
         """This one screams for refactoring,
@@ -71,6 +74,7 @@ class Display:
                 if k in (curses.KEY_BACKSPACE, 127):
                     search_term = search_term[:-1]
                 if curses.keyname(k) == b'^A':
+                    self.__teardown()
                     text = get_text_from_editor()
                     self.__setup()
                     search_term = text
