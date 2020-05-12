@@ -5,29 +5,30 @@ import time
 
 from src.core.knowledge_item import KnowledgeItem
 
+
 class KnowledgeService:
     def add(self, item):
         connection = sqlite3.connect('./db/knowledge.db')
         cursor = connection.cursor()
 
-        category_result = cursor.execute('''
+        cursor.execute('''
             SELECT name FROM category
             WHERE name = ?
             ''',
-            (item.category,))
+                       (item.category,))
 
         if cursor.fetchone() is None:
             cursor.execute('''
                 INSERT INTO category (name)
                 VALUES (?)
                 ''',
-                (item.category,))
-        
+                           (item.category,))
+
         cursor.execute('''
             SELECT id FROM category
             WHERE name = ?
             ''',
-            (item.category,))
+                       (item.category,))
 
         category_id = cursor.fetchone()[0]
 
@@ -35,10 +36,11 @@ class KnowledgeService:
             INSERT INTO knowledge_item (title, category_id, created_ts, content)
             VALUES (?, ?, ?, ?)
             ''',
-            (item.title,
-            category_id,
-            time.mktime(datetime.strptime(item.created, '%Y-%m-%d').timetuple()),
-            item.content))
+                       (item.title,
+                        category_id,
+                        time.mktime(datetime.strptime(
+                            item.created, '%Y-%m-%d').timetuple()),
+                        item.content))
 
         connection.commit()
         connection.close()
@@ -74,7 +76,7 @@ class KnowledgeService:
             regex_terms = [f'(?=.*{term})' for term in terms]
             regex = f'{"".join(regex_terms)}.*'
             knowledge = [item for item in knowledge if
-                    re.search(regex,
-                f'{item.category} {item.title}', re.IGNORECASE)] 
+                         re.search(regex,
+                                   f'{item.category} {item.title}', re.IGNORECASE)]
 
         return knowledge

@@ -1,6 +1,7 @@
 import curses
 from curses.textpad import Textbox, rectangle
 from src.core.knowledge_service import KnowledgeService
+from src.core.parser import knowledge_item_from_text
 from src.interface.editor_callout import get_text_from_editor
 from enum import Enum
 
@@ -28,7 +29,6 @@ class Display:
         curses.curs_set(0)
         self.stdscr.clear()
         self.stdscr.refresh()
-
 
     def __teardown(self):
         curses.nocbreak()
@@ -77,7 +77,8 @@ class Display:
                     self.__teardown()
                     text = get_text_from_editor()
                     self.__setup()
-                    search_term = text
+                    new_item = knowledge_item_from_text(text)
+                    knowledge_service.add(new_item)
 
             # key listeners for item screen state
             if screen_state == ScreenState.ITEM:

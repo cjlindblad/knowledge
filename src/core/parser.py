@@ -1,0 +1,19 @@
+from src.core.knowledge_item import KnowledgeItem
+from datetime import datetime
+
+
+def knowledge_item_from_text(input):
+    item = KnowledgeItem()
+    for line in input.split('\n'):
+        if 'title:' in line:
+            item.title = line.replace('title: ', '').replace('\n', '')
+        elif 'category:' in line:
+            item.category = line.replace('category: ', '').replace('\n', '')
+        elif 'content:' in line:
+            item.content = line.replace('content: ', '')
+        else:
+            item.content = item.content + line
+
+    item.created = datetime.now().strftime('%Y-%m-%d')
+
+    return item

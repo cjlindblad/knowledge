@@ -5,6 +5,7 @@ from src.interface.main import main as interface_main
 from src.core.knowledge_service import KnowledgeService
 from src.core.knowledge_item import KnowledgeItem
 
+
 def main():
     parser = argparse.ArgumentParser(description='Knowledge repository')
     parser.add_argument(
@@ -41,7 +42,8 @@ def main():
             if 'title:' in line:
                 item.title = line.replace('title: ', '').replace('\n', '')
             elif 'category:' in line:
-                item.category = line.replace('category: ', '').replace('\n', '')
+                item.category = line.replace(
+                    'category: ', '').replace('\n', '')
             elif 'created:' in line:
                 item.created = line.replace('created: ', '').replace('\n', '')
             elif 'content:' in line:
@@ -49,10 +51,9 @@ def main():
             else:
                 item.content = item.content + line
 
-
     else:
         interface_main()
 
+
 if __name__ == '__main__':
     main()
-
