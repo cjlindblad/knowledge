@@ -2,7 +2,7 @@
 import argparse
 import sys
 from src.interface.main import main as interface_main
-from src.core.knowledge_service import KnowledgeService
+from src.core.knowledge_repository import KnowledgeRepository
 from src.core.knowledge_item import KnowledgeItem
 
 
@@ -23,8 +23,8 @@ def main():
     args = parser.parse_args()
 
     if args.list:
-        knowledge_service = KnowledgeService()
-        knowledge = knowledge_service.list_knowledge()
+        knowledge_repo = KnowledgeRepository()
+        knowledge = knowledge_repo.list()
         for item in knowledge:
             sys.stdout.write(f'title: {item.title}\n')
             sys.stdout.write(f'category: {item.category}\n')
@@ -33,10 +33,10 @@ def main():
             sys.stdout.write('\n')
     elif args.add:
         item = KnowledgeItem()
-        knowledge_service = KnowledgeService()
+        knowledge_repo = KnowledgeRepository()
         for line in sys.stdin:
             if item.title and item.category and item.created and item.content:
-                knowledge_service.add(item)
+                knowledge_repo.add(item)
                 item = KnowledgeItem()
 
             if 'title:' in line:

@@ -1,6 +1,6 @@
 import curses
 from curses.textpad import Textbox, rectangle
-from src.core.knowledge_service import KnowledgeService
+from src.core.knowledge_repository import KnowledgeRepository
 from src.core.parser import knowledge_item_from_text
 from src.interface.editor_callout import get_text_from_editor
 from enum import Enum
@@ -42,7 +42,7 @@ class Display:
         but I'm going to play around just for a bit longer"""
 
         # members
-        knowledge_service = KnowledgeService()
+        knowledge_repo = KnowledgeRepository()
         k = 0
         menu_index = 0
         screen_state = ScreenState.LIST
@@ -73,12 +73,18 @@ class Display:
                     search_term = search_term + chr(k)
                 if k in (curses.KEY_BACKSPACE, 127):
                     search_term = search_term[:-1]
+                if curses.keyname(k) == b'^D':
+                    if len(data) == 0:
+                        pass
+                    else:
+                        selected_item = data[menu_index]
+                        knowledge_repo.delete(selected_item)
                 if curses.keyname(k) == b'^A':
                     self.__teardown()
                     text = get_text_from_editor()
                     self.__setup()
                     new_item = knowledge_item_from_text(text)
-                    knowledge_service.add(new_item)
+                    knowledge_repo.add(new_item)
 
             # key listeners for item screen state
             if screen_state == ScreenState.ITEM:
@@ -86,7 +92,7 @@ class Display:
                     screen_state = ScreenState.LIST
 
             # ask for data
-            data = knowledge_service.list_knowledge(search_term)
+            data = knowledge_repo.list(search_term)
             pages = (len(data) // PAGE_LENGTH) + 1
             if len(data) == 0:
                 menu_index = 0

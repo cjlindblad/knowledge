@@ -1,10 +1,10 @@
 TODO
+- Clear deleted items after a given period (?)
 - List search term highlighting
 - Don't allow prompt input on more than one line
 - db config (path in env?)
 - Return errors to shell
-- Delete items
+- Skip pages with right/left arrows
 
 BUGS
 - Pressing enter on empty list
-- When returning from vim, cursor appears in status menu

@@ -6,7 +6,7 @@ import time
 from src.core.knowledge_item import KnowledgeItem
 
 
-class KnowledgeService:
+class KnowledgeRepository:
     def add(self, item):
         connection = sqlite3.connect('./db/knowledge.db')
         cursor = connection.cursor()
@@ -45,22 +45,24 @@ class KnowledgeService:
         connection.commit()
         connection.close()
 
-    def list_knowledge(self, search_string=''):
+    def list(self, search_string=''):
         connection = sqlite3.connect('./db/knowledge.db')
         cursor = connection.cursor()
 
         query = '''
-        SELECT ki.created_ts as created, ki.title, ki.content, c.name as category
+        SELECT ki.id, ki.created_ts as created, ki.title, ki.content, c.name as category
         FROM knowledge_item ki
         LEFT JOIN category c ON c.id = ki.category_id
+        WHERE ki.deleted != 1
         ORDER BY ki.created_ts DESC;
         '''
 
         knowledge = []
 
         result = cursor.execute(query)
-        for created, title, content, category in result:
+        for id, created, title, content, category in result:
             knowledge.append(KnowledgeItem(
+                id,
                 datetime.utcfromtimestamp(created).strftime('%Y-%m-%d'),
                 title,
                 content,
@@ -80,3 +82,16 @@ class KnowledgeService:
                                    f'{item.category} {item.title}', re.IGNORECASE)]
 
         return knowledge
+
+    def delete(self, item):
+        connection = sqlite3.connect('./db/knowledge.db')
+        cursor = connection.cursor()
+
+        cursor.execute('''
+        UPDATE knowledge_item
+        SET deleted = 1
+        WHERE id = ?
+        ''', (item.id,))
+
+        connection.commit()
+        connection.close()
