@@ -1,10 +1,8 @@
 TODO
 - Clear deleted items after a given period (?)
+- Edit items
 - List search term highlighting
 - Don't allow prompt input on more than one line
 - db config (path in env?)
 - Return errors to shell
 - Skip pages with right/left arrows
-
-BUGS
-- Pressing enter on empty list

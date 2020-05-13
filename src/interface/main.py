@@ -68,7 +68,8 @@ class Display:
                 if k == curses.KEY_DOWN and menu_index < len(data) - 1:
                     menu_index = menu_index + 1
                 if k in (curses.KEY_ENTER, 10, 13):
-                    screen_state = ScreenState.ITEM
+                    if len(data) > 0:
+                        screen_state = ScreenState.ITEM
                 if k and curses.ascii.isprint(chr(k)):
                     search_term = search_term + chr(k)
                 if k in (curses.KEY_BACKSPACE, 127):
