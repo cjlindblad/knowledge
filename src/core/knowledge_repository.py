@@ -83,6 +83,39 @@ class KnowledgeRepository:
 
         return knowledge
 
+    def update(self, item):
+        connection = sqlite3.connect('./db/knowledge.db')
+        cursor = connection.cursor()
+
+        cursor.execute('''
+            SELECT name FROM category
+            WHERE name = ?
+            ''',
+                       (item.category,))
+
+        if cursor.fetchone() is None:
+            cursor.execute('''
+                INSERT INTO category (name)
+                VALUES (?)
+                ''',
+                           (item.category,))
+
+        cursor.execute('''
+            SELECT id FROM category
+            WHERE name = ?
+            ''',
+                       (item.category,))
+
+        category_id = cursor.fetchone()[0]
+
+        cursor.execute('''UPDATE knowledge_item
+        SET title = ?, content = ?, category_id = ?
+        WHERE id = ?
+        ''', (item.title, item.content, category_id, item.id))
+
+        connection.commit()
+        connection.close()
+
     def delete(self, item):
         connection = sqlite3.connect('./db/knowledge.db')
         cursor = connection.cursor()

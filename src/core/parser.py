@@ -2,7 +2,16 @@ from src.core.knowledge_item import KnowledgeItem
 from datetime import datetime
 
 
-def knowledge_item_from_text(input):
+def knowledge_item_to_text(item):
+    text = f'''title: {item.title}
+category: {item.category} 
+content: {item.content}
+    '''
+
+    return text
+
+
+def text_to_knowledge_item(input):
     item = KnowledgeItem()
     for line in input.split('\n'):
         if 'title:' in line:
