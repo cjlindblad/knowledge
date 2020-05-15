@@ -1,0 +1,8 @@
+{
+  "runOnSave.commands": [
+    {
+      "command": "clear; cd ${workspaceFolder}; python3 -m unittest discover src \"*_test.py\"",
+      "runIn": "terminal"
+    }
+  ]
+}

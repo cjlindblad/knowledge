@@ -3,10 +3,7 @@ from datetime import datetime
 
 
 def knowledge_item_to_text(item):
-    text = f'''title: {item.title}
-category: {item.category} 
-content: {item.content}
-    '''
+    text = f'title: {item.title}\ncategory: {item.category}\ncontent: {item.content}\n'
 
     return text
 
