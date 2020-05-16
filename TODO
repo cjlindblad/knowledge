@@ -1,7 +1,5 @@
 TODO
 - Clear deleted items after a given period (?)
-- Handle newlines
-- Add unit testing tools
 - Trash non used categories
 - List search term highlighting
 - Don't allow prompt input on more than one line
