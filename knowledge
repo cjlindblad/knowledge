@@ -56,4 +56,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        e = sys.exc_info()[0]
+        sys.stdout.write(f'{e}\n')
