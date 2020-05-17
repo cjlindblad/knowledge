@@ -7,69 +7,70 @@ from src.core.knowledge_item import KnowledgeItem
 
 
 class KnowledgeRepository:
+    def __init__(self, db=None):
+        if db is None:
+            self.db = sqlite3.connect('./db/knowledge.db')
+        else:
+            self.db = db
+
     def add(self, item):
-        connection = sqlite3.connect('./db/knowledge.db')
-        cursor = connection.cursor()
+        with self.db:
+            cursor = self.db.cursor()
 
-        cursor.execute('''
-            SELECT name FROM category
-            WHERE name = ?
-            ''',
-                       (item.category,))
-
-        if cursor.fetchone() is None:
             cursor.execute('''
-                INSERT INTO category (name)
-                VALUES (?)
+                SELECT name FROM category
+                WHERE name = ?
                 ''',
                            (item.category,))
 
-        cursor.execute('''
-            SELECT id FROM category
-            WHERE name = ?
-            ''',
-                       (item.category,))
+            if cursor.fetchone() is None:
+                cursor.execute('''
+                    INSERT INTO category (name)
+                    VALUES (?)
+                    ''',
+                               (item.category,))
 
-        category_id = cursor.fetchone()[0]
+            cursor.execute('''
+                SELECT id FROM category
+                WHERE name = ?
+                ''',
+                           (item.category,))
 
-        cursor.execute('''
-            INSERT INTO knowledge_item (title, category_id, created_ts, content)
-            VALUES (?, ?, ?, ?)
-            ''',
-                       (item.title,
-                        category_id,
-                        time.mktime(datetime.strptime(
-                            item.created, '%Y-%m-%d').timetuple()),
-                        item.content))
+            category_id = cursor.fetchone()[0]
 
-        connection.commit()
-        connection.close()
+            cursor.execute('''
+                INSERT INTO knowledge_item (title, category_id, created_ts, content)
+                VALUES (?, ?, ?, ?)
+                ''',
+                           (item.title,
+                            category_id,
+                            time.mktime(datetime.strptime(
+                                item.created, '%Y-%m-%d').timetuple()),
+                            item.content))
 
     def list(self, search_string=''):
-        connection = sqlite3.connect('./db/knowledge.db')
-        cursor = connection.cursor()
-
-        query = '''
-        SELECT ki.id, ki.created_ts as created, ki.title, ki.content, c.name as category
-        FROM knowledge_item ki
-        LEFT JOIN category c ON c.id = ki.category_id
-        WHERE ki.deleted != 1
-        ORDER BY ki.created_ts DESC;
-        '''
-
         knowledge = []
 
-        result = cursor.execute(query)
-        for id, created, title, content, category in result:
-            knowledge.append(KnowledgeItem(
-                id,
-                datetime.utcfromtimestamp(created).strftime('%Y-%m-%d'),
-                title,
-                content,
-                category
-            ))
+        with self.db:
+            cursor = self.db.cursor()
 
-        connection.close()
+            query = '''
+            SELECT ki.id, ki.created_ts as created, ki.title, ki.content, c.name as category
+            FROM knowledge_item ki
+            LEFT JOIN category c ON c.id = ki.category_id
+            WHERE ki.deleted != 1
+            ORDER BY ki.created_ts DESC;
+            '''
+
+            result = cursor.execute(query)
+            for id, created, title, content, category in result:
+                knowledge.append(KnowledgeItem(
+                    id,
+                    datetime.fromtimestamp(created).strftime('%Y-%m-%d'),
+                    title,
+                    content,
+                    category
+                ))
 
         if search_string:
             # filter result
@@ -84,47 +85,41 @@ class KnowledgeRepository:
         return knowledge
 
     def update(self, item):
-        connection = sqlite3.connect('./db/knowledge.db')
-        cursor = connection.cursor()
+        with self.db:
+            cursor = self.db.cursor()
 
-        cursor.execute('''
-            SELECT name FROM category
-            WHERE name = ?
-            ''',
-                       (item.category,))
-
-        if cursor.fetchone() is None:
             cursor.execute('''
-                INSERT INTO category (name)
-                VALUES (?)
+                SELECT name FROM category
+                WHERE name = ?
                 ''',
                            (item.category,))
 
-        cursor.execute('''
-            SELECT id FROM category
-            WHERE name = ?
-            ''',
-                       (item.category,))
+            if cursor.fetchone() is None:
+                cursor.execute('''
+                    INSERT INTO category (name)
+                    VALUES (?)
+                    ''',
+                               (item.category,))
 
-        category_id = cursor.fetchone()[0]
+            cursor.execute('''
+                SELECT id FROM category
+                WHERE name = ?
+                ''',
+                           (item.category,))
 
-        cursor.execute('''UPDATE knowledge_item
-        SET title = ?, content = ?, category_id = ?
-        WHERE id = ?
-        ''', (item.title, item.content, category_id, item.id))
+            category_id = cursor.fetchone()[0]
 
-        connection.commit()
-        connection.close()
+            cursor.execute('''UPDATE knowledge_item
+            SET title = ?, content = ?, category_id = ?
+            WHERE id = ?
+            ''', (item.title, item.content, category_id, item.id))
 
     def delete(self, item):
-        connection = sqlite3.connect('./db/knowledge.db')
-        cursor = connection.cursor()
+        with self.db:
+            cursor = self.db.cursor()
 
-        cursor.execute('''
-        UPDATE knowledge_item
-        SET deleted = 1
-        WHERE id = ?
-        ''', (item.id,))
-
-        connection.commit()
-        connection.close()
+            cursor.execute('''
+            UPDATE knowledge_item
+            SET deleted = 1
+            WHERE id = ?
+            ''', (item.id,))

@@ -6,3 +6,4 @@ TODO
 - db config (path in env?)
 - Skip pages with right/left arrows
 - Don't save new item if nothing is added to text file
+- UTC?
