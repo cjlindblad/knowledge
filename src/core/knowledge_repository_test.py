@@ -7,8 +7,11 @@ from src.core.knowledge_item import KnowledgeItem
 class KnowledgeRepositoryTest(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(':memory:')
+        self.__initialize_db(self.db)
+        self.repo = KnowledgeRepository(self.db)
 
-        with self.db:
+    def __initialize_db(self, db):
+        with db:
             cursor = self.db.cursor()
 
             db_script = ''
@@ -18,8 +21,6 @@ class KnowledgeRepositoryTest(unittest.TestCase):
             statements = db_script.split(';')
             for statement in statements:
                 cursor.execute(f'{statement};')
-
-        self.repo = KnowledgeRepository(self.db)
 
     def test_add_and_list_one_item(self):
         title = 'test title'
