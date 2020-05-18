@@ -14,6 +14,12 @@ class KnowledgeRepository:
             self.db = db
 
     def add(self, item):
+        if not item.created:
+            item.created = datetime.now().strftime('%Y-%m-%d')
+
+        if not item.valid:
+            return
+
         with self.db:
             cursor = self.db.cursor()
 

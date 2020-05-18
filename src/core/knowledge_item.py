@@ -5,3 +5,9 @@ class KnowledgeItem:
         self.title = title
         self.content = content
         self.category = category
+
+    @property
+    def valid(self):
+        return (self.created != ''
+                and self.title != ''
+                and self.content != '')

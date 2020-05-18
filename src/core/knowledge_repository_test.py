@@ -44,5 +44,26 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(content, result[0].content)
         self.assertEqual(created, result[0].created)
 
+    def test_should_not_add_empty_item(self):
+        item = KnowledgeItem()
+
+        self.repo.add(item)
+
+        result = self.repo.list()
+
+        self.assertEqual(0, len(result))
+
+    def test_should_handle_item_without_date(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+
+        self.repo.add(item)
+
+        result = self.repo.list()
+
+        self.assertEqual(1, len(result))
+        self.assertFalse(result[0].created.isspace())
+
     def tearDown(self):
         self.db.close()
