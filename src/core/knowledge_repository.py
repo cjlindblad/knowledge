@@ -91,6 +91,9 @@ class KnowledgeRepository:
         return knowledge
 
     def update(self, item):
+        if not item.valid:
+            return
+
         with self.db:
             cursor = self.db.cursor()
 

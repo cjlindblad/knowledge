@@ -65,6 +65,43 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertFalse(result[0].created.isspace())
 
+    def test_updates_single_item(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+        item.category = 'test category'
+        self.repo.add(item)
+
+        db_item = self.repo.list()[0]
+        db_item.title = 'updated title'
+        db_item.content = 'updated content'
+        db_item.category = 'updated category'
+        self.repo.update(db_item)
+
+        result = self.repo.list()[0]
+
+        self.assertEqual('updated title', result.title)
+        self.assertEqual('updated content', result.content)
+        self.assertEqual('updated category', result.category)
+
+    def test_does_not_update_invalid_item(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+        item.category = 'test category'
+        self.repo.add(item)
+
+        db_item = self.repo.list()[0]
+        db_item.title = None
+        db_item.content = None
+        db_item.created = None
+        self.repo.update(db_item)
+
+        result = self.repo.list()[0]
+
+        self.assertEqual('test title', result.title)
+        self.assertEqual('test content', result.content)
+
     def test_deletes_single_item(self):
         item = KnowledgeItem()
         item.title = 'test title'

@@ -8,6 +8,4 @@ class KnowledgeItem:
 
     @property
     def valid(self):
-        return (self.created != ''
-                and self.title != ''
-                and self.content != '')
+        return self.created and self.title and self.content
