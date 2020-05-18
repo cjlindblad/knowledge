@@ -65,5 +65,31 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertFalse(result[0].created.isspace())
 
+    def test_deletes_single_item(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+        item.category = 'test category'
+
+        self.repo.add(item)
+        id = self.repo.list()[0].id
+        self.repo.delete(id)
+        result = self.repo.list()
+
+        self.assertEqual(0, len(result))
+
+    def test_does_not_delete_invalid_id(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+        item.category = 'test category'
+
+        self.repo.add(item)
+        id = self.repo.list()[0].id
+        self.repo.delete(id + 1)
+        result = self.repo.list()
+
+        self.assertEqual(1, len(result))
+
     def tearDown(self):
         self.db.close()

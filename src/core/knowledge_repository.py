@@ -120,7 +120,7 @@ class KnowledgeRepository:
             WHERE id = ?
             ''', (item.title, item.content, category_id, item.id))
 
-    def delete(self, item):
+    def delete(self, id):
         with self.db:
             cursor = self.db.cursor()
 
@@ -128,4 +128,4 @@ class KnowledgeRepository:
             UPDATE knowledge_item
             SET deleted = 1
             WHERE id = ?
-            ''', (item.id,))
+            ''', (id,))

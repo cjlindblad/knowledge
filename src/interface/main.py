@@ -79,7 +79,7 @@ class Display:
                         pass
                     else:
                         selected_item = data[menu_index]
-                        knowledge_repo.delete(selected_item)
+                        knowledge_repo.delete(selected_item.id)
                 if curses.keyname(k) == b'^A':
                     self.__teardown()
                     text = get_text_from_editor()
