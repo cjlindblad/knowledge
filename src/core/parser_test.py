@@ -1,5 +1,5 @@
 import unittest
-from src.core.parser import knowledge_item_to_text, text_to_knowledge_item
+from src.core.parser import Parser
 from src.core.knowledge_item import KnowledgeItem
 
 
@@ -24,7 +24,7 @@ class ParserTest(unittest.TestCase):
     def test_parses_plain_knowledge_item(self):
         item = self.__knowledge_item(self.fields)
 
-        text = knowledge_item_to_text(item)
+        text = Parser.knowledge_item_to_text(item)
 
         expected_result = self.__text_representation(self.fields)
 
@@ -33,7 +33,7 @@ class ParserTest(unittest.TestCase):
     def test_parses_plain_textual_representation(self):
         text = self.__text_representation(self.fields)
 
-        item = text_to_knowledge_item(text)
+        item = Parser.text_to_knowledge_item(text)
 
         self.assertEqual(self.fields['title'], item.title)
         self.assertEqual(self.fields['category'], item.category)
@@ -44,7 +44,7 @@ class ParserTest(unittest.TestCase):
         self.fields['content'] = content
         text = self.__text_representation(self.fields)
 
-        item = text_to_knowledge_item(text)
+        item = Parser.text_to_knowledge_item(text)
 
         self.assertEqual(content, item.content)
 
@@ -53,7 +53,7 @@ class ParserTest(unittest.TestCase):
         self.fields['content'] = content
         text = self.__text_representation(self.fields)
 
-        item = text_to_knowledge_item(text)
+        item = Parser.text_to_knowledge_item(text)
 
         self.assertEqual(content, item.content)
 
@@ -63,7 +63,7 @@ class ParserTest(unittest.TestCase):
         item = self.__knowledge_item(self.fields)
 
         expected_result = self.__text_representation(self.fields)
-        text = knowledge_item_to_text(item)
+        text = Parser.knowledge_item_to_text(item)
 
         self.assertEqual(expected_result, text)
 
@@ -73,7 +73,7 @@ class ParserTest(unittest.TestCase):
         item = self.__knowledge_item(self.fields)
 
         expected_result = self.__text_representation(self.fields)
-        text = knowledge_item_to_text(item)
+        text = Parser.knowledge_item_to_text(item)
 
         self.assertEqual(expected_result, text)
 

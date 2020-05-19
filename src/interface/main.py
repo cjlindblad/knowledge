@@ -1,7 +1,7 @@
 import curses
 from curses.textpad import Textbox, rectangle
 from src.core.knowledge_repository import KnowledgeRepository
-from src.core.parser import text_to_knowledge_item, knowledge_item_to_text
+from src.core.parser import Parser
 from src.interface.editor_callout import get_text_from_editor
 from enum import Enum
 
@@ -84,7 +84,7 @@ class Display:
                     self.__teardown()
                     text = get_text_from_editor()
                     self.__setup()
-                    new_item = text_to_knowledge_item(text)
+                    new_item = Parser.text_to_knowledge_item(text)
                     knowledge_repo.add(new_item)
                 if curses.keyname(k) == b'^E':
                     if len(data) == 0:
@@ -93,9 +93,9 @@ class Display:
                         selected_item = data[menu_index]
                         self.__teardown()
                         text = get_text_from_editor(
-                            knowledge_item_to_text(selected_item))
+                            Parser.knowledge_item_to_text(selected_item))
                         self.__setup()
-                        new_item = text_to_knowledge_item(text)
+                        new_item = Parser.text_to_knowledge_item(text)
                         selected_item.title = new_item.title
                         selected_item.category = new_item.category
                         selected_item.content = new_item.content
