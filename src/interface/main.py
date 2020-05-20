@@ -3,6 +3,7 @@ from curses.textpad import Textbox, rectangle
 from src.core.knowledge_repository import KnowledgeRepository
 from src.core.parser import Parser
 from src.interface.editor_callout import get_text_from_editor
+from src.interface.list_navigator import ListNavigator
 from enum import Enum
 
 
@@ -44,11 +45,8 @@ class Display:
         # members
         knowledge_repo = KnowledgeRepository()
         k = 0
-        menu_index = 0
         screen_state = ScreenState.LIST
         search_term = ''
-        current_page = 0
-        pages = 1
         data = []
 
         # constants
@@ -59,14 +57,16 @@ class Display:
         LIST_END = WIN_HEIGHT - 1 - STATUS_BAR_HEIGHT
         PAGE_LENGTH = WIN_HEIGHT - LIST_TOP_MARGIN - STATUS_BAR_HEIGHT
 
+        navigator = ListNavigator(0, PAGE_LENGTH)
+
         # main loop
         while (True):
             # key listeners for list screen state
             if screen_state == ScreenState.LIST:
-                if k == curses.KEY_UP and menu_index > 0:
-                    menu_index = menu_index - 1
-                if k == curses.KEY_DOWN and menu_index < len(data) - 1:
-                    menu_index = menu_index + 1
+                if k == curses.KEY_UP:
+                    navigator.prev()
+                if k == curses.KEY_DOWN:
+                    navigator.next()
                 if k in (curses.KEY_ENTER, 10, 13):
                     if len(data) > 0:
                         screen_state = ScreenState.ITEM
@@ -78,7 +78,7 @@ class Display:
                     if len(data) == 0:
                         pass
                     else:
-                        selected_item = data[menu_index]
+                        selected_item = data[navigator.selected]
                         knowledge_repo.delete(selected_item.id)
                 if curses.keyname(k) == b'^A':
                     self.__teardown()
@@ -90,7 +90,7 @@ class Display:
                     if len(data) == 0:
                         pass
                     else:
-                        selected_item = data[menu_index]
+                        selected_item = data[navigator.selected]
                         self.__teardown()
                         text = get_text_from_editor(
                             Parser.knowledge_item_to_text(selected_item))
@@ -108,15 +108,9 @@ class Display:
 
             # ask for data
             data = knowledge_repo.list(search_term)
-            pages = (len(data) // PAGE_LENGTH) + 1
-            if len(data) == 0:
-                menu_index = 0
-            elif menu_index > len(data) - 1:
-                menu_index = len(data) - 1
 
-            current_page = (menu_index) // PAGE_LENGTH
-            list_start = current_page * PAGE_LENGTH
-            list_end = list_start + PAGE_LENGTH
+            # update navigator
+            navigator.set_size(len(data))
 
             # clear screen
             self.stdscr.clear()
@@ -124,26 +118,27 @@ class Display:
             # render functions
             if (screen_state == ScreenState.LIST):
                 # render list
-                for i, item in enumerate(data[list_start:list_end + 1]):
-                    attribute = curses.A_NORMAL
-                    if menu_index % PAGE_LENGTH == i:
-                        attribute = curses.A_REVERSE
-                    y_position = i + LIST_TOP_MARGIN
-                    if y_position >= LIST_START and y_position <= LIST_END:
-                        self.stdscr.addstr(LIST_TOP_MARGIN + i, 0,
-                                           f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
+                if navigator.selected != -1:
+                    for i, item in enumerate(data[navigator.start:navigator.stop + 1]):
+                        attribute = curses.A_NORMAL
+                        if navigator.selected % PAGE_LENGTH == i:
+                            attribute = curses.A_REVERSE
+                        y_position = i + LIST_TOP_MARGIN
+                        if y_position >= LIST_START and y_position <= LIST_END:
+                            self.stdscr.addstr(LIST_TOP_MARGIN + i, 0,
+                                               f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
                 # render prompt
                 self.stdscr.addstr(0, 0, f'> {search_term}')
             elif (screen_state == ScreenState.ITEM):
                 # render item content
-                item = data[menu_index]
+                item = data[navigator.selected]
                 lines = item.content.splitlines()
                 for i, line in enumerate(lines):
                     self.stdscr.addstr(i, 0, line)
 
             # render status bar
             self.stdscr.addstr(WIN_HEIGHT - 1, 0,
-                               f'Page {current_page + 1} / {pages}')
+                               f'Page {navigator.current_page} / {navigator.total_pages}')
 
             # paint
             self.stdscr.refresh()
