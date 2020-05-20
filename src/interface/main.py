@@ -67,6 +67,10 @@ class Display:
                     navigator.prev()
                 if k == curses.KEY_DOWN:
                     navigator.next()
+                if k == curses.KEY_RIGHT:
+                    navigator.next_page()
+                if k == curses.KEY_LEFT:
+                    navigator.prev_page()
                 if k in (curses.KEY_ENTER, 10, 13):
                     if len(data) > 0:
                         screen_state = ScreenState.ITEM
