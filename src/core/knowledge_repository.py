@@ -4,6 +4,7 @@ from datetime import datetime
 import time
 
 from src.core.knowledge_item import KnowledgeItem
+from src.core.category_repository import CategoryRepository
 
 
 class KnowledgeRepository:
@@ -23,33 +24,19 @@ class KnowledgeRepository:
         with self.db:
             cursor = self.db.cursor()
 
-            cursor.execute('''
-                SELECT name FROM category
-                WHERE name = ?
-                ''',
-                           (item.category,))
+            category_repo = CategoryRepository(self.db)
+            db_category = category_repo.get_by_name(item.category)
 
-            if cursor.fetchone() is None:
-                cursor.execute('''
-                    INSERT INTO category (name)
-                    VALUES (?)
-                    ''',
-                               (item.category,))
-
-            cursor.execute('''
-                SELECT id FROM category
-                WHERE name = ?
-                ''',
-                           (item.category,))
-
-            category_id = cursor.fetchone()[0]
+            if not db_category:
+                category_repo.add(item.category)
+                db_category = category_repo.get_by_name(item.category)
 
             cursor.execute('''
                 INSERT INTO knowledge_item (title, category_id, created_ts, content)
                 VALUES (?, ?, ?, ?)
                 ''',
                            (item.title,
-                            category_id,
+                            db_category.id,
                             time.mktime(datetime.strptime(
                                 item.created, '%Y-%m-%d').timetuple()),
                             item.content))
@@ -96,32 +83,17 @@ class KnowledgeRepository:
 
         with self.db:
             cursor = self.db.cursor()
+            category_repo = CategoryRepository(self.db)
+            db_category = category_repo.get_by_name(item.category)
 
-            cursor.execute('''
-                SELECT name FROM category
-                WHERE name = ?
-                ''',
-                           (item.category,))
-
-            if cursor.fetchone() is None:
-                cursor.execute('''
-                    INSERT INTO category (name)
-                    VALUES (?)
-                    ''',
-                               (item.category,))
-
-            cursor.execute('''
-                SELECT id FROM category
-                WHERE name = ?
-                ''',
-                           (item.category,))
-
-            category_id = cursor.fetchone()[0]
+            if not db_category:
+                category_repo.add(item.category)
+                db_category = category_repo.get_by_name(item.category)
 
             cursor.execute('''UPDATE knowledge_item
             SET title = ?, content = ?, category_id = ?
             WHERE id = ?
-            ''', (item.title, item.content, category_id, item.id))
+            ''', (item.title, item.content, db_category.id, item.id))
 
     def delete(self, id):
         with self.db:
