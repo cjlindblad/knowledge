@@ -95,6 +95,8 @@ class KnowledgeRepository:
             WHERE id = ?
             ''', (item.title, item.content, db_category.id, item.id))
 
+            category_repo.clean_unused()
+
     def delete(self, id):
         with self.db:
             cursor = self.db.cursor()

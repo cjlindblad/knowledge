@@ -40,3 +40,9 @@ class CategoryRepository:
             cursor = self.db.cursor()
             cursor.execute(
                 'INSERT INTO category (name) VALUES (?)', (name,))
+
+    def clean_unused(self):
+        with self.db:
+            cursor = self.db.cursor()
+            cursor.execute(
+                'DELETE FROM category WHERE id NOT IN (SELECT category_id FROM knowledge_item)')

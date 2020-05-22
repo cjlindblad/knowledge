@@ -1,6 +1,7 @@
 import unittest
 import sqlite3
 from src.core.knowledge_repository import KnowledgeRepository
+from src.core.category_repository import CategoryRepository
 from src.core.knowledge_item import KnowledgeItem
 
 
@@ -8,7 +9,8 @@ class KnowledgeRepositoryTest(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(':memory:')
         self.__initialize_db(self.db)
-        self.repo = KnowledgeRepository(self.db)
+        self.knowledge_repo = KnowledgeRepository(self.db)
+        self.category_repo = CategoryRepository(self.db)
 
     def __initialize_db(self, db):
         with db:
@@ -34,9 +36,9 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         item.content = content
         item.created = created
 
-        self.repo.add(item)
+        self.knowledge_repo.add(item)
 
-        result = self.repo.list()
+        result = self.knowledge_repo.list()
 
         self.assertEqual(1, len(result))
         self.assertEqual(title, result[0].title)
@@ -47,9 +49,9 @@ class KnowledgeRepositoryTest(unittest.TestCase):
     def test_should_not_add_empty_item(self):
         item = KnowledgeItem()
 
-        self.repo.add(item)
+        self.knowledge_repo.add(item)
 
-        result = self.repo.list()
+        result = self.knowledge_repo.list()
 
         self.assertEqual(0, len(result))
 
@@ -58,9 +60,9 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         item.title = 'test title'
         item.content = 'test content'
 
-        self.repo.add(item)
+        self.knowledge_repo.add(item)
 
-        result = self.repo.list()
+        result = self.knowledge_repo.list()
 
         self.assertEqual(1, len(result))
         self.assertFalse(result[0].created.isspace())
@@ -70,15 +72,15 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         item.title = 'test title'
         item.content = 'test content'
         item.category = 'test category'
-        self.repo.add(item)
+        self.knowledge_repo.add(item)
 
-        db_item = self.repo.list()[0]
+        db_item = self.knowledge_repo.list()[0]
         db_item.title = 'updated title'
         db_item.content = 'updated content'
         db_item.category = 'updated category'
-        self.repo.update(db_item)
+        self.knowledge_repo.update(db_item)
 
-        result = self.repo.list()[0]
+        result = self.knowledge_repo.list()[0]
 
         self.assertEqual('updated title', result.title)
         self.assertEqual('updated content', result.content)
@@ -89,15 +91,15 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         item.title = 'test title'
         item.content = 'test content'
         item.category = 'test category'
-        self.repo.add(item)
+        self.knowledge_repo.add(item)
 
-        db_item = self.repo.list()[0]
+        db_item = self.knowledge_repo.list()[0]
         db_item.title = None
         db_item.content = None
         db_item.created = None
-        self.repo.update(db_item)
+        self.knowledge_repo.update(db_item)
 
-        result = self.repo.list()[0]
+        result = self.knowledge_repo.list()[0]
 
         self.assertEqual('test title', result.title)
         self.assertEqual('test content', result.content)
@@ -108,10 +110,10 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         item.content = 'test content'
         item.category = 'test category'
 
-        self.repo.add(item)
-        id = self.repo.list()[0].id
-        self.repo.delete(id)
-        result = self.repo.list()
+        self.knowledge_repo.add(item)
+        id = self.knowledge_repo.list()[0].id
+        self.knowledge_repo.delete(id)
+        result = self.knowledge_repo.list()
 
         self.assertEqual(0, len(result))
 
@@ -121,12 +123,27 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         item.content = 'test content'
         item.category = 'test category'
 
-        self.repo.add(item)
-        id = self.repo.list()[0].id
-        self.repo.delete(id + 1)
-        result = self.repo.list()
+        self.knowledge_repo.add(item)
+        id = self.knowledge_repo.list()[0].id
+        self.knowledge_repo.delete(id + 1)
+        result = self.knowledge_repo.list()
 
         self.assertEqual(1, len(result))
+
+    def test_cleans_up_unused_categories_on_update(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+        item.category = 'initial category'
+        self.knowledge_repo.add(item)
+
+        db_item = self.knowledge_repo.list()[0]
+        db_item.category = 'updated category'
+        self.knowledge_repo.update(db_item)
+        categories = self.category_repo.list()
+
+        self.assertEqual(1, len(categories))
+        self.assertEqual('updated category', categories[0].name)
 
     def tearDown(self):
         self.db.close()
