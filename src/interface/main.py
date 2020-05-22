@@ -5,6 +5,7 @@ from src.core.parser import Parser
 from src.interface.editor_callout import get_text_from_editor
 from src.interface.list_navigator import ListNavigator
 from enum import Enum
+from textwrap import wrap
 
 
 class ScreenState(Enum):
@@ -136,9 +137,8 @@ class Display:
             elif (screen_state == ScreenState.ITEM):
                 # render item content
                 item = data[navigator.selected]
-                lines = item.content.splitlines()
-                for i, line in enumerate(lines):
-                    self.stdscr.addstr(i, 0, line)
+                self.stdscr.addstr(0, 0, '\n'.join(wrap(
+                    item.content, width=WIN_WIDTH, replace_whitespace=False)))
 
             # render status bar
             self.stdscr.addstr(WIN_HEIGHT - 1, 0,

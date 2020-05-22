@@ -1,12 +1,10 @@
 TODO
 - Really delete items (+ remove unused categories when doing so)
-- Paragraphs
 - Simplify knowledge item creation
 - Clear deleted items after a given period (?)
 - Trash non used categories
 - List search term highlighting
 - Don't allow prompt input on more than one line
 - db config (path in env?)
-- Skip pages with right/left arrows
 - Don't save new item if nothing is added to text file
 - UTC?
