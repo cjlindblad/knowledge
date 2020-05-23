@@ -172,5 +172,60 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(1, len(archived_items))
         self.assertEqual('title 2', archived_items[0].title)
 
+    def test_deletes_items(self):
+        item1 = KnowledgeItem()
+        item1.title = 'title 1'
+        item1.content = 'content 1'
+        item1.category = 'category 1'
+
+        item2 = KnowledgeItem()
+        item2.title = 'title 2'
+        item2.content = 'content 2'
+        item2.category = 'category 2'
+
+        item3 = KnowledgeItem()
+        item3.title = 'title 3'
+        item3.content = 'content 3'
+        item3.category = 'category 3'
+
+        self.knowledge_repo.add(item1)
+        self.knowledge_repo.add(item2)
+        self.knowledge_repo.add(item3)
+
+        items = self.knowledge_repo.list()
+
+        item1.id = next(item.id for item in items if item.title == 'title 1')
+        item2.id = next(item.id for item in items if item.title == 'title 2')
+        item3.id = next(item.id for item in items if item.title == 'title 3')
+
+        # delete 2 of the 3 items, one going through archive first
+        self.knowledge_repo.archive(item2.id)
+        self.knowledge_repo.delete(item2.id)
+        self.knowledge_repo.delete(item3.id)
+
+        active_items = self.knowledge_repo.list()
+        archived_items = self.knowledge_repo.list_archived()
+
+        self.assertEqual(1, len(active_items))
+        self.assertEqual('title 1', active_items[0].title)
+        self.assertEqual(0, len(archived_items))
+
+    def test_does_not_delete_invalid_item_id(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.category = 'test category'
+        item.content = 'test content'
+
+        self.knowledge_repo.add(item)
+
+        item.id = next(item.id for item in self.knowledge_repo.list())
+
+        self.knowledge_repo.delete(item.id + 1)
+
+        items = self.knowledge_repo.list()
+
+        self.assertEqual(1, len(items))
+        self.assertEqual('test title', items[0].title)
+
     def tearDown(self):
         self.db.close()

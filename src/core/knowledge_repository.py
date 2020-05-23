@@ -115,3 +115,12 @@ class KnowledgeRepository:
             SET archived = 1
             WHERE id = ?
             ''', (id,))
+
+    def delete(self, id):
+        with self.db:
+            cursor = self.db.cursor()
+
+            cursor.execute('''
+            DELETE FROM knowledge_item
+            WHERE id = ?
+            ''', (id,))
