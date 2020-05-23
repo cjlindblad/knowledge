@@ -124,3 +124,6 @@ class KnowledgeRepository:
             DELETE FROM knowledge_item
             WHERE id = ?
             ''', (id,))
+
+        category_repo = CategoryRepository(self.db)
+        category_repo.clean_unused()

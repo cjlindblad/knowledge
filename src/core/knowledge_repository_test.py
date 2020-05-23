@@ -227,5 +227,29 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(1, len(items))
         self.assertEqual('test title', items[0].title)
 
+    def test_cleans_up_unused_categories_on_deletion(self):
+        item1 = KnowledgeItem()
+        item1.title = 'title 1'
+        item1.category = 'category 1'
+        item1.content = 'content 1'
+
+        item2 = KnowledgeItem()
+        item2.title = 'title 2'
+        item2.category = 'category 2'
+        item2.content = 'content 2'
+
+        self.knowledge_repo.add(item1)
+        self.knowledge_repo.add(item2)
+
+        item2.id = next(
+            item.id for item in self.knowledge_repo.list() if item.title == 'title 2')
+
+        self.knowledge_repo.delete(item2.id)
+
+        categories = self.category_repo.list()
+
+        self.assertEqual(1, len(categories))
+        self.assertEqual('category 1', categories[0].name)
+
     def tearDown(self):
         self.db.close()
