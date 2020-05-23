@@ -41,29 +41,12 @@ class KnowledgeRepository:
                                 item.created, '%Y-%m-%d').timetuple()),
                             item.content))
 
+    def list_archived(self):
+        knowledge = self.__list(active=False)
+        return knowledge
+
     def list(self, search_string=''):
-        knowledge = []
-
-        with self.db:
-            cursor = self.db.cursor()
-
-            query = '''
-            SELECT ki.id, ki.created_ts as created, ki.title, ki.content, c.name as category
-            FROM knowledge_item ki
-            LEFT JOIN category c ON c.id = ki.category_id
-            WHERE ki.archived != 1
-            ORDER BY ki.created_ts DESC;
-            '''
-
-            result = cursor.execute(query)
-            for id, created, title, content, category in result:
-                knowledge.append(KnowledgeItem(
-                    id,
-                    datetime.fromtimestamp(created).strftime('%Y-%m-%d'),
-                    title,
-                    content,
-                    category
-                ))
+        knowledge = self.__list()
 
         if search_string:
             # filter result
@@ -74,6 +57,32 @@ class KnowledgeRepository:
             knowledge = [item for item in knowledge if
                          re.search(regex,
                                    f'{item.category} {item.title}', re.IGNORECASE)]
+
+        return knowledge
+
+    def __list(self, active=True):
+        knowledge = []
+
+        with self.db:
+            cursor = self.db.cursor()
+
+            query = '''
+            SELECT ki.id, ki.created_ts as created, ki.title, ki.content, c.name as category
+            FROM knowledge_item ki
+            LEFT JOIN category c ON c.id = ki.category_id
+            WHERE ki.archived != ?
+            ORDER BY ki.created_ts DESC;
+            '''
+
+            result = cursor.execute(query, (active,))
+            for id, created, title, content, category in result:
+                knowledge.append(KnowledgeItem(
+                    id,
+                    datetime.fromtimestamp(created).strftime('%Y-%m-%d'),
+                    title,
+                    content,
+                    category
+                ))
 
         return knowledge
 

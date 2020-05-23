@@ -145,5 +145,32 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(1, len(categories))
         self.assertEqual('updated category', categories[0].name)
 
+    def test_lists_archived_items(self):
+        item1 = KnowledgeItem()
+        item1.title = 'title 1'
+        item1.content = 'content 1'
+        item1.category = 'category 1'
+
+        item2 = KnowledgeItem()
+        item2.title = 'title 2'
+        item2.content = 'content 2'
+        item2.category = 'category 2'
+
+        self.knowledge_repo.add(item1)
+        self.knowledge_repo.add(item2)
+
+        item2_id = next(item.id for item in self.knowledge_repo.list()
+                        if item.title == 'title 2')
+        self.knowledge_repo.archive(item2_id)
+
+        active_items = self.knowledge_repo.list()
+        archived_items = self.knowledge_repo.list_archived()
+
+        self.assertEqual(1, len(active_items))
+        self.assertEqual('title 1', active_items[0].title)
+
+        self.assertEqual(1, len(archived_items))
+        self.assertEqual('title 2', archived_items[0].title)
+
     def tearDown(self):
         self.db.close()
