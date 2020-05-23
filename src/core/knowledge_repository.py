@@ -51,7 +51,7 @@ class KnowledgeRepository:
             SELECT ki.id, ki.created_ts as created, ki.title, ki.content, c.name as category
             FROM knowledge_item ki
             LEFT JOIN category c ON c.id = ki.category_id
-            WHERE ki.deleted != 1
+            WHERE ki.archived != 1
             ORDER BY ki.created_ts DESC;
             '''
 
@@ -97,12 +97,12 @@ class KnowledgeRepository:
 
             category_repo.clean_unused()
 
-    def delete(self, id):
+    def archive(self, id):
         with self.db:
             cursor = self.db.cursor()
 
             cursor.execute('''
             UPDATE knowledge_item
-            SET deleted = 1
+            SET archived = 1
             WHERE id = ?
             ''', (id,))

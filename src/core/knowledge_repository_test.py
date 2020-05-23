@@ -104,7 +104,7 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual('test title', result.title)
         self.assertEqual('test content', result.content)
 
-    def test_deletes_single_item(self):
+    def test_archives_single_item(self):
         item = KnowledgeItem()
         item.title = 'test title'
         item.content = 'test content'
@@ -112,12 +112,12 @@ class KnowledgeRepositoryTest(unittest.TestCase):
 
         self.knowledge_repo.add(item)
         id = self.knowledge_repo.list()[0].id
-        self.knowledge_repo.delete(id)
+        self.knowledge_repo.archive(id)
         result = self.knowledge_repo.list()
 
         self.assertEqual(0, len(result))
 
-    def test_does_not_delete_invalid_id(self):
+    def test_does_not_archive_invalid_id(self):
         item = KnowledgeItem()
         item.title = 'test title'
         item.content = 'test content'
@@ -125,7 +125,7 @@ class KnowledgeRepositoryTest(unittest.TestCase):
 
         self.knowledge_repo.add(item)
         id = self.knowledge_repo.list()[0].id
-        self.knowledge_repo.delete(id + 1)
+        self.knowledge_repo.archive(id + 1)
         result = self.knowledge_repo.list()
 
         self.assertEqual(1, len(result))

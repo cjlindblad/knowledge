@@ -9,7 +9,7 @@ CREATE TABLE knowledge_item (
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   category_id INTEGER NULL,
-  deleted INTEGER DEFAULT 0 NOT NULL,
+  archived INTEGER DEFAULT 0 NOT NULL,
   FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
