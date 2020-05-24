@@ -116,6 +116,16 @@ class KnowledgeRepository:
             WHERE id = ?
             ''', (id,))
 
+    def restore(self, id):
+        with self.db:
+            cursor = self.db.cursor()
+
+            cursor.execute('''
+            UPDATE knowledge_item
+            SET archived = 0
+            WHERE id = ?
+            ''', (id,))
+
     def delete(self, id):
         with self.db:
             cursor = self.db.cursor()

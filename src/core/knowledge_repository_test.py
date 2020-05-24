@@ -251,5 +251,22 @@ class KnowledgeRepositoryTest(unittest.TestCase):
         self.assertEqual(1, len(categories))
         self.assertEqual('category 1', categories[0].name)
 
+    def test_restores_archived_items(self):
+        item = KnowledgeItem()
+        item.title = 'test title'
+        item.content = 'test content'
+        item.category = 'test category'
+
+        self.knowledge_repo.add(item)
+        item.id = next(i.id for i in self.knowledge_repo.list())
+
+        self.knowledge_repo.archive(item.id)
+        self.knowledge_repo.restore(item.id)
+
+        items = self.knowledge_repo.list()
+
+        self.assertEqual(1, len(items))
+        self.assertEqual('test title', items[0].title)
+
     def tearDown(self):
         self.db.close()

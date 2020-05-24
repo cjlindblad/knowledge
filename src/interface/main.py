@@ -100,6 +100,10 @@ class Display:
                     self.__setup()
                     new_item = Parser.text_to_knowledge_item(text)
                     knowledge_repo.add(new_item)
+                if curses.keyname(k) == b'^R':
+                    if screen_state == ScreenState.LIST_ARCHIVED:
+                        selected_item = data[navigator.selected]
+                        knowledge_repo.restore(selected_item.id)
                 if curses.keyname(k) == b'^E':
                     if len(data) == 0:
                         pass
