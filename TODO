@@ -1,9 +1,8 @@
 TODO
-- Really delete items (+ remove unused categories when doing so)
+- Restore archived items
 - Paragraphs not really behaving like they should
 - Simplify knowledge item creation
 - Clear deleted items after a given period (?)
-- Trash non used categories
 - List search term highlighting
 - Don't allow prompt input on more than one line
 - db config (path in env?)

@@ -9,8 +9,9 @@ from textwrap import wrap
 
 
 class ScreenState(Enum):
-    LIST = 1
-    ITEM = 2
+    LIST_ACTIVE = 1
+    LIST_ARCHIVED = 2
+    ITEM = 3
 
 
 class Display:
@@ -46,7 +47,7 @@ class Display:
         # members
         knowledge_repo = KnowledgeRepository()
         k = 0
-        screen_state = ScreenState.LIST
+        screen_state = ScreenState.LIST_ACTIVE
         search_term = ''
         data = []
 
@@ -63,7 +64,7 @@ class Display:
         # main loop
         while (True):
             # key listeners for list screen state
-            if screen_state == ScreenState.LIST:
+            if screen_state == ScreenState.LIST_ACTIVE or screen_state == ScreenState.LIST_ARCHIVED:
                 if k == curses.KEY_UP:
                     navigator.prev()
                 if k == curses.KEY_DOWN:
@@ -79,12 +80,20 @@ class Display:
                     search_term = search_term + chr(k)
                 if k in (curses.KEY_BACKSPACE, 127):
                     search_term = search_term[:-1]
+                if curses.keyname(k) == b'^T':
+                    if screen_state == ScreenState.LIST_ACTIVE:
+                        screen_state = ScreenState.LIST_ARCHIVED
+                    elif screen_state == ScreenState.LIST_ARCHIVED:
+                        screen_state = ScreenState.LIST_ACTIVE
                 if curses.keyname(k) == b'^D':
                     if len(data) == 0:
                         pass
                     else:
                         selected_item = data[navigator.selected]
-                        knowledge_repo.archive(selected_item.id)
+                        if screen_state == ScreenState.LIST_ACTIVE:
+                            knowledge_repo.archive(selected_item.id)
+                        elif screen_state == ScreenState.LIST_ARCHIVED:
+                            knowledge_repo.delete(selected_item.id)
                 if curses.keyname(k) == b'^A':
                     self.__teardown()
                     text = get_text_from_editor()
@@ -109,10 +118,13 @@ class Display:
             # key listeners for item screen state
             if screen_state == ScreenState.ITEM:
                 if k == ord('b'):
-                    screen_state = ScreenState.LIST
+                    screen_state = ScreenState.LIST_ACTIVE
 
             # ask for data
-            data = knowledge_repo.list(search_term)
+            if screen_state == ScreenState.LIST_ACTIVE:
+                data = knowledge_repo.list(search_term)
+            elif screen_state == ScreenState.LIST_ARCHIVED:
+                data = knowledge_repo.list_archived()
 
             # update navigator
             navigator.set_size(len(data))
@@ -121,7 +133,7 @@ class Display:
             self.stdscr.clear()
 
             # render functions
-            if (screen_state == ScreenState.LIST):
+            if screen_state == ScreenState.LIST_ACTIVE or screen_state == ScreenState.LIST_ARCHIVED:
                 # render list
                 if navigator.selected != -1:
                     for i, item in enumerate(data[navigator.start:navigator.stop + 1]):
@@ -134,15 +146,18 @@ class Display:
                                                f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
                 # render prompt
                 self.stdscr.addstr(0, 0, f'> {search_term}')
-            elif (screen_state == ScreenState.ITEM):
+            elif screen_state == ScreenState.ITEM:
                 # render item content
                 item = data[navigator.selected]
                 self.stdscr.addstr(0, 0, '\n'.join(wrap(
                     item.content, width=WIN_WIDTH, replace_whitespace=False)))
 
             # render status bar
+            status_text = f'Page {navigator.current_page} / {navigator.total_pages}'
+            if screen_state == ScreenState.LIST_ARCHIVED:
+                status_text = f'{status_text} (Archived)'
             self.stdscr.addstr(WIN_HEIGHT - 1, 0,
-                               f'Page {navigator.current_page} / {navigator.total_pages}')
+                               status_text)
 
             # paint
             self.stdscr.refresh()
