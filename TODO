@@ -1,5 +1,6 @@
 TODO
-- Paragraphs not really behaving like they should
+- Show command hints
+- Edit active item
 - Simplify knowledge item creation
 - Clear deleted items after a given period (?)
 - List search term highlighting

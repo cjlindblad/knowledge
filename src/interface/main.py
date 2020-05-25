@@ -4,8 +4,8 @@ from src.core.knowledge_repository import KnowledgeRepository
 from src.core.parser import Parser
 from src.interface.editor_callout import get_text_from_editor
 from src.interface.list_navigator import ListNavigator
+from src.interface.text import Text
 from enum import Enum
-from textwrap import wrap
 
 
 class ScreenState(Enum):
@@ -153,8 +153,7 @@ class Display:
             elif screen_state == ScreenState.ITEM:
                 # render item content
                 item = data[navigator.selected]
-                self.stdscr.addstr(0, 0, '\n'.join(wrap(
-                    item.content, width=WIN_WIDTH, replace_whitespace=False)))
+                self.stdscr.addstr(0, 0, Text.format(item.content, WIN_WIDTH))
 
             # render status bar
             status_text = f'Page {navigator.current_page} / {navigator.total_pages}'
