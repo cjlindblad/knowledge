@@ -1,6 +1,7 @@
 TODO
 - Show command hints
 - Edit active item
+- Abstract some sort of command dispatcher
 - Simplify knowledge item creation
 - Clear deleted items after a given period (?)
 - List search term highlighting
