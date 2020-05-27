@@ -59,8 +59,42 @@ class Display:
 
         curses.endwin()
 
-    def navigate(self):
-        pass
+    def add_item(self):
+        self.__teardown()
+        text = get_text_from_editor()
+        self.__setup()
+        new_item = Parser.text_to_knowledge_item(text)
+        self.knowledge_repo.add(new_item)
+
+    def edit_item(self):
+        if len(self.data) == 0:
+            pass
+        else:
+            selected_item = self.data[self.navigator.selected]
+            self.__teardown()
+            text = get_text_from_editor(
+                Parser.knowledge_item_to_text(selected_item))
+            self.__setup()
+            new_item = Parser.text_to_knowledge_item(text)
+            selected_item.title = new_item.title
+            selected_item.category = new_item.category
+            selected_item.content = new_item.content
+            self.knowledge_repo.update(selected_item)
+
+    def restore_item(self):
+        if self.screen_state == ScreenState.LIST_ARCHIVED:
+            selected_item = self.data[self.navigator.selected]
+            self.knowledge_repo.restore(selected_item.id)
+
+    def delete_item(self):
+        if len(self.data) == 0:
+            pass
+        else:
+            selected_item = self.data[self.navigator.selected]
+            if self.screen_state == ScreenState.LIST_ACTIVE:
+                self.knowledge_repo.archive(selected_item.id)
+            elif self.screen_state == ScreenState.LIST_ARCHIVED:
+                self.knowledge_repo.delete(selected_item.id)
 
     def draw_screen(self):
         """This one screams for refactoring,
@@ -91,39 +125,13 @@ class Display:
                     elif self.screen_state == ScreenState.LIST_ARCHIVED:
                         self.screen_state = ScreenState.LIST_ACTIVE
                 if curses.keyname(self.k) == b'^D':
-                    if len(self.data) == 0:
-                        pass
-                    else:
-                        selected_item = self.data[self.navigator.selected]
-                        if self.screen_state == ScreenState.LIST_ACTIVE:
-                            self.knowledge_repo.archive(selected_item.id)
-                        elif self.screen_state == ScreenState.LIST_ARCHIVED:
-                            self.knowledge_repo.delete(selected_item.id)
-                if curses.keyname(self.k) == b'^A':
-                    self.__teardown()
-                    text = get_text_from_editor()
-                    self.__setup()
-                    new_item = Parser.text_to_knowledge_item(text)
-                    self.knowledge_repo.add(new_item)
+                    self.delete_item()
                 if curses.keyname(self.k) == b'^R':
-                    if self.screen_state == ScreenState.LIST_ARCHIVED:
-                        selected_item = self.data[self.navigator.selected]
-                        self.knowledge_repo.restore(selected_item.id)
+                    self.restore_item()
+                if curses.keyname(self.k) == b'^A':
+                    self.add_item()
                 if curses.keyname(self.k) == b'^E':
-                    if len(self.data) == 0:
-                        pass
-                    else:
-                        selected_item = self.data[self.navigator.selected]
-                        self.__teardown()
-                        text = get_text_from_editor(
-                            Parser.knowledge_item_to_text(selected_item))
-                        self.__setup()
-                        new_item = Parser.text_to_knowledge_item(text)
-                        selected_item.title = new_item.title
-                        selected_item.category = new_item.category
-                        selected_item.content = new_item.content
-                        self.knowledge_repo.update(selected_item)
-
+                    self.edit_item()
             # key listeners for item screen state
             if self.screen_state == ScreenState.ITEM:
                 if self.k == ord('b'):
