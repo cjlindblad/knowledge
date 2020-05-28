@@ -96,12 +96,52 @@ class Display:
             elif self.screen_state == ScreenState.LIST_ARCHIVED:
                 self.knowledge_repo.delete(selected_item.id)
 
+    def confirm(self):
+        if len(self.data) > 0:
+            self.screen_state = ScreenState.ITEM
+
+    def toggle_view(self):
+        if self.screen_state == ScreenState.LIST_ACTIVE:
+            self.screen_state = ScreenState.LIST_ARCHIVED
+        elif self.screen_state == ScreenState.LIST_ARCHIVED:
+            self.screen_state = ScreenState.LIST_ACTIVE
+
     def draw_screen(self):
         """This one screams for refactoring,
         but I'm going to play around just for a bit longer"""
 
+        commands = {
+            b'^T': {
+                ScreenState.LIST_ACTIVE: self.toggle_view,
+                ScreenState.LIST_ARCHIVED: self.toggle_view
+            },
+            b'^D': {
+                ScreenState.LIST_ACTIVE: self.delete_item,
+                ScreenState.LIST_ARCHIVED: self.delete_item
+            },
+            b'^R': {
+                ScreenState.LIST_ACTIVE: self.restore_item,
+                ScreenState.LIST_ARCHIVED: self.restore_item
+            },
+            b'^A': {
+                ScreenState.LIST_ACTIVE: self.add_item,
+                ScreenState.LIST_ARCHIVED: self.add_item
+            },
+            b'^E': {
+                ScreenState.LIST_ACTIVE: self.edit_item,
+                ScreenState.LIST_ARCHIVED: self.edit_item
+            }
+        }
+
         # main loop
         while (True):
+            # TODO needs some naming love
+            command_name = curses.keyname(self.k)
+            if command_name in commands:
+                command = commands[command_name]
+                if self.screen_state in command:
+                    command[self.screen_state]()
+
             # key listeners for list screen state
             if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
                 if self.k == curses.KEY_UP:
@@ -113,25 +153,12 @@ class Display:
                 if self.k == curses.KEY_LEFT:
                     self.navigator.prev_page()
                 if self.k in (curses.KEY_ENTER, 10, 13):
-                    if len(self.data) > 0:
-                        self.screen_state = ScreenState.ITEM
+                    self.confirm()
                 if self.k and curses.ascii.isprint(chr(self.k)):
                     self.search_term = self.search_term + chr(self.k)
                 if self.k in (curses.KEY_BACKSPACE, 127):
                     self.search_term = self.search_term[:-1]
-                if curses.keyname(self.k) == b'^T':
-                    if self.screen_state == ScreenState.LIST_ACTIVE:
-                        self.screen_state = ScreenState.LIST_ARCHIVED
-                    elif self.screen_state == ScreenState.LIST_ARCHIVED:
-                        self.screen_state = ScreenState.LIST_ACTIVE
-                if curses.keyname(self.k) == b'^D':
-                    self.delete_item()
-                if curses.keyname(self.k) == b'^R':
-                    self.restore_item()
-                if curses.keyname(self.k) == b'^A':
-                    self.add_item()
-                if curses.keyname(self.k) == b'^E':
-                    self.edit_item()
+
             # key listeners for item screen state
             if self.screen_state == ScreenState.ITEM:
                 if self.k == ord('b'):
