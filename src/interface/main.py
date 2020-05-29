@@ -125,6 +125,9 @@ class Display:
                 b'^A': self.add_item,
                 b'^E': self.edit_item,
             },
+            ScreenState.ITEM: {
+                b'^E': self.edit_item
+            }
         }
 
         # main loop
