@@ -111,36 +111,28 @@ class Display:
         but I'm going to play around just for a bit longer"""
 
         commands = {
-            b'^T': {
-                ScreenState.LIST_ACTIVE: self.toggle_view,
-                ScreenState.LIST_ARCHIVED: self.toggle_view
+            ScreenState.LIST_ACTIVE: {
+                b'^T': self.toggle_view,
+                b'^D': self.delete_item,
+                b'^R': self.restore_item,
+                b'^A': self.add_item,
+                b'^E': self.edit_item
             },
-            b'^D': {
-                ScreenState.LIST_ACTIVE: self.delete_item,
-                ScreenState.LIST_ARCHIVED: self.delete_item
+            ScreenState.LIST_ARCHIVED: {
+                b'^T': self.toggle_view,
+                b'^D': self.delete_item,
+                b'^R': self.restore_item,
+                b'^A': self.add_item,
+                b'^E': self.edit_item,
             },
-            b'^R': {
-                ScreenState.LIST_ACTIVE: self.restore_item,
-                ScreenState.LIST_ARCHIVED: self.restore_item
-            },
-            b'^A': {
-                ScreenState.LIST_ACTIVE: self.add_item,
-                ScreenState.LIST_ARCHIVED: self.add_item
-            },
-            b'^E': {
-                ScreenState.LIST_ACTIVE: self.edit_item,
-                ScreenState.LIST_ARCHIVED: self.edit_item
-            }
         }
 
         # main loop
         while (True):
-            # TODO needs some naming love
             command_name = curses.keyname(self.k)
-            if command_name in commands:
-                command = commands[command_name]
-                if self.screen_state in command:
-                    command[self.screen_state]()
+            screen_commands = commands[self.screen_state]
+            if command_name in screen_commands:
+                screen_commands[command_name]()
 
             # key listeners for list screen state
             if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
