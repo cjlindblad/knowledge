@@ -35,6 +35,51 @@ class Display:
 
         self.navigator = ListNavigator(0, self.PAGE_LENGTH)
 
+        # commands
+        # TODO switch these out for enums and classes
+        command_objects = {
+            'toggle_view': {
+                'command': self.toggle_view,
+                'hint': 'Toggle'
+            },
+            'delete_item': {
+                'command': self.delete_item,
+                'hint': 'Delete'
+            },
+            'restore_item': {
+                'command': self.restore_item,
+                'hint': 'Restore'
+            },
+            'add_item': {
+                'command': self.add_item,
+                'hint': 'Add'
+            },
+            'edit_item': {
+                'command': self.edit_item,
+                'hint': 'Edit'
+            }
+        }
+
+        self.commands = {
+            ScreenState.LIST_ACTIVE: {
+                b'^T': command_objects['toggle_view'],
+                b'^D': command_objects['delete_item'],
+                b'^R': command_objects['restore_item'],
+                b'^A': command_objects['add_item'],
+                b'^E': command_objects['edit_item']
+            },
+            ScreenState.LIST_ARCHIVED: {
+                b'^T': command_objects['toggle_view'],
+                b'^D': command_objects['delete_item'],
+                b'^R': command_objects['restore_item'],
+                b'^A': command_objects['add_item'],
+                b'^E': command_objects['edit_item']
+            },
+            ScreenState.ITEM: {
+                b'^E': command_objects['edit_item']
+            }
+        }
+
     def __del__(self):
         self.__teardown()
 
@@ -106,36 +151,19 @@ class Display:
         elif self.screen_state == ScreenState.LIST_ARCHIVED:
             self.screen_state = ScreenState.LIST_ACTIVE
 
+    def get_active_commands(self):
+        return self.commands[self.screen_state]
+
     def draw_screen(self):
         """This one screams for refactoring,
         but I'm going to play around just for a bit longer"""
 
-        commands = {
-            ScreenState.LIST_ACTIVE: {
-                b'^T': self.toggle_view,
-                b'^D': self.delete_item,
-                b'^R': self.restore_item,
-                b'^A': self.add_item,
-                b'^E': self.edit_item
-            },
-            ScreenState.LIST_ARCHIVED: {
-                b'^T': self.toggle_view,
-                b'^D': self.delete_item,
-                b'^R': self.restore_item,
-                b'^A': self.add_item,
-                b'^E': self.edit_item,
-            },
-            ScreenState.ITEM: {
-                b'^E': self.edit_item
-            }
-        }
-
         # main loop
         while (True):
             command_name = curses.keyname(self.k)
-            screen_commands = commands[self.screen_state]
-            if command_name in screen_commands:
-                screen_commands[command_name]()
+            commands = self.get_active_commands()
+            if command_name in commands:
+                commands[command_name]['command']()
 
             # key listeners for list screen state
             if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
@@ -192,11 +220,22 @@ class Display:
                     item.content, self.WIN_WIDTH))
 
             # render status bar
-            status_text = f'Page {self.navigator.current_page} / {self.navigator.total_pages}'
+            status_text = ''
+            status_text += f'Page {self.navigator.current_page} / {self.navigator.total_pages}'
             if self.screen_state == ScreenState.LIST_ARCHIVED:
                 status_text = f'{status_text} (Archived)'
-            self.stdscr.addstr(self.WIN_HEIGHT - 1, 0,
-                               status_text)
+
+            # add command hints
+            commands = self.get_active_commands()
+            for key, value in commands.items():
+                status_text += f'  ({key.decode("utf-8")}){value["hint"][1:]}'
+
+            wrapped_status_text = Text.format(status_text, self.WIN_WIDTH)
+
+            line_count = wrapped_status_text.count('\n') + 1
+
+            self.stdscr.addstr(self.WIN_HEIGHT - line_count, 0,
+                               wrapped_status_text)
 
             # paint
             self.stdscr.refresh()
