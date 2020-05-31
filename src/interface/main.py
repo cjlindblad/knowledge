@@ -57,6 +57,18 @@ class Display:
             'edit_item': {
                 'command': self.edit_item,
                 'hint': 'Edit'
+            },
+            'next_item': {
+                'command': self.next_item
+            },
+            'prev_item': {
+                'command': self.prev_item
+            },
+            'next_page': {
+                'command': self.next_page
+            },
+            'prev_page': {
+                'command': self.prev_page
             }
         }
 
@@ -66,14 +78,22 @@ class Display:
                 b'^D': command_objects['delete_item'],
                 b'^R': command_objects['restore_item'],
                 b'^A': command_objects['add_item'],
-                b'^E': command_objects['edit_item']
+                b'^E': command_objects['edit_item'],
+                b'KEY_UP': command_objects['prev_item'],
+                b'KEY_DOWN': command_objects['next_item'],
+                b'KEY_LEFT': command_objects['prev_page'],
+                b'KEY_RIGHT': command_objects['next_page']
             },
             ScreenState.LIST_ARCHIVED: {
                 b'^T': command_objects['toggle_view'],
                 b'^D': command_objects['delete_item'],
                 b'^R': command_objects['restore_item'],
                 b'^A': command_objects['add_item'],
-                b'^E': command_objects['edit_item']
+                b'^E': command_objects['edit_item'],
+                b'KEY_UP': command_objects['prev_item'],
+                b'KEY_DOWN': command_objects['next_item'],
+                b'KEY_LEFT': command_objects['prev_page'],
+                b'KEY_RIGHT': command_objects['next_page']
             },
             ScreenState.ITEM: {
                 b'^E': command_objects['edit_item']
@@ -151,6 +171,18 @@ class Display:
         elif self.screen_state == ScreenState.LIST_ARCHIVED:
             self.screen_state = ScreenState.LIST_ACTIVE
 
+    def next_item(self):
+        self.navigator.next()
+
+    def prev_item(self):
+        self.navigator.prev()
+
+    def next_page(self):
+        self.navigator.next_page()
+
+    def prev_page(self):
+        self.navigator.prev_page()
+
     def get_active_commands(self):
         return self.commands[self.screen_state]
 
@@ -167,14 +199,6 @@ class Display:
 
             # key listeners for list screen state
             if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
-                if self.k == curses.KEY_UP:
-                    self.navigator.prev()
-                if self.k == curses.KEY_DOWN:
-                    self.navigator.next()
-                if self.k == curses.KEY_RIGHT:
-                    self.navigator.next_page()
-                if self.k == curses.KEY_LEFT:
-                    self.navigator.prev_page()
                 if self.k in (curses.KEY_ENTER, 10, 13):
                     self.confirm()
                 if self.k and curses.ascii.isprint(chr(self.k)):
@@ -228,7 +252,8 @@ class Display:
             # add command hints
             commands = self.get_active_commands()
             for key, value in commands.items():
-                status_text += f'  ({key.decode("utf-8")}){value["hint"][1:]}'
+                if 'hint' in value:
+                    status_text += f'  ({key.decode("utf-8")}){value["hint"][1:]}'
 
             wrapped_status_text = Text.format(status_text, self.WIN_WIDTH)
 
