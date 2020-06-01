@@ -69,34 +69,49 @@ class Display:
             },
             'prev_page': {
                 'command': self.prev_page
+            },
+            'confirm': {
+                'command': self.confirm
+            },
+            'backspace': {
+                'command': self.backspace
+            },
+            'go_back': {
+                'command': self.go_back,
+                'hint': 'back'
             }
         }
 
         self.commands = {
             ScreenState.LIST_ACTIVE: {
-                b'^T': command_objects['toggle_view'],
-                b'^D': command_objects['delete_item'],
-                b'^R': command_objects['restore_item'],
-                b'^A': command_objects['add_item'],
-                b'^E': command_objects['edit_item'],
-                b'KEY_UP': command_objects['prev_item'],
-                b'KEY_DOWN': command_objects['next_item'],
-                b'KEY_LEFT': command_objects['prev_page'],
-                b'KEY_RIGHT': command_objects['next_page']
+                20: command_objects['toggle_view'],
+                4: command_objects['delete_item'],
+                18: command_objects['restore_item'],
+                1: command_objects['add_item'],
+                5: command_objects['edit_item'],
+                259: command_objects['prev_item'],
+                258: command_objects['next_item'],
+                260: command_objects['prev_page'],
+                261: command_objects['next_page'],
+                10: command_objects['confirm'],
+                127: command_objects['backspace']
             },
             ScreenState.LIST_ARCHIVED: {
-                b'^T': command_objects['toggle_view'],
-                b'^D': command_objects['delete_item'],
-                b'^R': command_objects['restore_item'],
-                b'^A': command_objects['add_item'],
-                b'^E': command_objects['edit_item'],
-                b'KEY_UP': command_objects['prev_item'],
-                b'KEY_DOWN': command_objects['next_item'],
-                b'KEY_LEFT': command_objects['prev_page'],
-                b'KEY_RIGHT': command_objects['next_page']
+                20: command_objects['toggle_view'],
+                4: command_objects['delete_item'],
+                18: command_objects['restore_item'],
+                1: command_objects['add_item'],
+                5: command_objects['edit_item'],
+                259: command_objects['prev_item'],
+                258: command_objects['next_item'],
+                260: command_objects['prev_page'],
+                261: command_objects['next_page'],
+                10: command_objects['confirm'],
+                127: command_objects['backspace']
             },
             ScreenState.ITEM: {
-                b'^E': command_objects['edit_item']
+                5: command_objects['edit_item'],
+                2: command_objects['go_back']
             }
         }
 
@@ -183,6 +198,13 @@ class Display:
     def prev_page(self):
         self.navigator.prev_page()
 
+    def backspace(self):
+        self.search_term = self.search_term[:-1]
+
+    def go_back(self):
+        if self.screen_state == ScreenState.ITEM:
+            self.screen_state = ScreenState.LIST_ACTIVE
+
     def get_active_commands(self):
         return self.commands[self.screen_state]
 
@@ -192,24 +214,14 @@ class Display:
 
         # main loop
         while (True):
-            command_name = curses.keyname(self.k)
             commands = self.get_active_commands()
-            if command_name in commands:
-                commands[command_name]['command']()
+            if self.k in commands:
+                commands[self.k]['command']()
 
             # key listeners for list screen state
             if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
-                if self.k in (curses.KEY_ENTER, 10, 13):
-                    self.confirm()
                 if self.k and curses.ascii.isprint(chr(self.k)):
                     self.search_term = self.search_term + chr(self.k)
-                if self.k in (curses.KEY_BACKSPACE, 127):
-                    self.search_term = self.search_term[:-1]
-
-            # key listeners for item screen state
-            if self.screen_state == ScreenState.ITEM:
-                if self.k == ord('b'):
-                    self.screen_state = ScreenState.LIST_ACTIVE
 
             # ask for data
             if self.screen_state == ScreenState.LIST_ACTIVE:
@@ -253,7 +265,7 @@ class Display:
             commands = self.get_active_commands()
             for key, value in commands.items():
                 if 'hint' in value:
-                    status_text += f'  ({key.decode("utf-8")}){value["hint"][1:]}'
+                    status_text += f'  ({(curses.keyname(key)).decode("utf-8")}){value["hint"][1:]}'
 
             wrapped_status_text = Text.format(status_text, self.WIN_WIDTH)
 
