@@ -267,7 +267,7 @@ class Display:
                 if 'hint' in value:
                     status_text += f'  ({(curses.keyname(key)).decode("utf-8")}){value["hint"][1:]}'
 
-            wrapped_status_text = Text.format(status_text, self.WIN_WIDTH)
+            wrapped_status_text = Text.format(status_text, self.WIN_WIDTH - 1)
 
             line_count = wrapped_status_text.count('\n') + 1
 

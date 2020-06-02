@@ -7,6 +7,3 @@ TODO
 - db config (path in env?)
 - Don't save new item if nothing is added to text file
 - UTC?
-
-BUGS
-- Crashes when status bar changes height on toggle (try with narrow terminal)
