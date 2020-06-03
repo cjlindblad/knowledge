@@ -4,6 +4,5 @@ TODO
 - Clear deleted items after a given period (?)
 - List search term highlighting
 - Don't allow prompt input on more than one line
-- db config (path in env?)
 - Don't save new item if nothing is added to text file
 - UTC?

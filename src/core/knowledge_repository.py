@@ -5,12 +5,13 @@ import time
 
 from src.core.knowledge_item import KnowledgeItem
 from src.core.category_repository import CategoryRepository
+from utils import base_path
 
 
 class KnowledgeRepository:
     def __init__(self, db=None):
         if db is None:
-            self.db = sqlite3.connect('./db/knowledge.db')
+            self.db = sqlite3.connect(f'{base_path()}/db/knowledge.db')
         else:
             self.db = db
 

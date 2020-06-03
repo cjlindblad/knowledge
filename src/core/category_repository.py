@@ -1,11 +1,12 @@
 import sqlite3
 from src.core.category import Category
+from utils import base_path
 
 
 class CategoryRepository:
     def __init__(self, db=None):
         if db is None:
-            self.db = sqlite3.connect('./db/knowledge.db')
+            self.db = sqlite3.connect(f'{base_path}/db/knowledge.db')
         else:
             self.db = db
 
