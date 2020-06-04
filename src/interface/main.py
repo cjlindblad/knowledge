@@ -5,13 +5,7 @@ from src.core.parser import Parser
 from src.interface.editor_callout import get_text_from_editor
 from src.interface.list_navigator import ListNavigator
 from src.interface.text import Text
-from enum import Enum
-
-
-class ScreenState(Enum):
-    LIST_ACTIVE = 1
-    LIST_ARCHIVED = 2
-    ITEM = 3
+from src.interface.model import Model, ScreenState
 
 
 class Display:
@@ -19,9 +13,10 @@ class Display:
         self.__setup()
 
         # members
+        self.model = Model()
+
         self.knowledge_repo = KnowledgeRepository()
         self.k = 0
-        self.screen_state = ScreenState.LIST_ACTIVE
         self.search_term = ''
         self.data = []
 
@@ -162,7 +157,7 @@ class Display:
             self.knowledge_repo.update(selected_item)
 
     def restore_item(self):
-        if self.screen_state == ScreenState.LIST_ARCHIVED:
+        if self.model.screen_state == ScreenState.LIST_ARCHIVED:
             selected_item = self.data[self.navigator.selected]
             self.knowledge_repo.restore(selected_item.id)
 
@@ -171,20 +166,20 @@ class Display:
             pass
         else:
             selected_item = self.data[self.navigator.selected]
-            if self.screen_state == ScreenState.LIST_ACTIVE:
+            if self.model.screen_state == ScreenState.LIST_ACTIVE:
                 self.knowledge_repo.archive(selected_item.id)
-            elif self.screen_state == ScreenState.LIST_ARCHIVED:
+            elif self.model.screen_state == ScreenState.LIST_ARCHIVED:
                 self.knowledge_repo.delete(selected_item.id)
 
     def confirm(self):
         if len(self.data) > 0:
-            self.screen_state = ScreenState.ITEM
+            self.model.screen_state = ScreenState.ITEM
 
     def toggle_view(self):
-        if self.screen_state == ScreenState.LIST_ACTIVE:
-            self.screen_state = ScreenState.LIST_ARCHIVED
-        elif self.screen_state == ScreenState.LIST_ARCHIVED:
-            self.screen_state = ScreenState.LIST_ACTIVE
+        if self.model.screen_state == ScreenState.LIST_ACTIVE:
+            self.model.screen_state = ScreenState.LIST_ARCHIVED
+        elif self.model.screen_state == ScreenState.LIST_ARCHIVED:
+            self.model.screen_state = ScreenState.LIST_ACTIVE
 
     def next_item(self):
         self.navigator.next()
@@ -202,11 +197,11 @@ class Display:
         self.search_term = self.search_term[:-1]
 
     def go_back(self):
-        if self.screen_state == ScreenState.ITEM:
-            self.screen_state = ScreenState.LIST_ACTIVE
+        if self.model.screen_state == ScreenState.ITEM:
+            self.model.screen_state = ScreenState.LIST_ACTIVE
 
     def get_active_commands(self):
-        return self.commands[self.screen_state]
+        return self.commands[self.model.screen_state]
 
     def draw_screen(self):
         """This one screams for refactoring,
@@ -219,14 +214,14 @@ class Display:
                 commands[self.k]['command']()
 
             # key listeners for list screen state
-            if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
+            if self.model.screen_state == ScreenState.LIST_ACTIVE or self.model.screen_state == ScreenState.LIST_ARCHIVED:
                 if self.k and curses.ascii.isprint(chr(self.k)):
                     self.search_term = self.search_term + chr(self.k)
 
             # ask for data
-            if self.screen_state == ScreenState.LIST_ACTIVE:
+            if self.model.screen_state == ScreenState.LIST_ACTIVE:
                 self.data = self.knowledge_repo.list(self.search_term)
-            elif self.screen_state == ScreenState.LIST_ARCHIVED:
+            elif self.model.screen_state == ScreenState.LIST_ARCHIVED:
                 self.data = self.knowledge_repo.list_archived()
 
             # update navigator
@@ -236,7 +231,7 @@ class Display:
             self.stdscr.clear()
 
             # render functions
-            if self.screen_state == ScreenState.LIST_ACTIVE or self.screen_state == ScreenState.LIST_ARCHIVED:
+            if self.model.screen_state == ScreenState.LIST_ACTIVE or self.model.screen_state == ScreenState.LIST_ARCHIVED:
                 # render list
                 if self.navigator.selected != -1:
                     for i, item in enumerate(self.data[self.navigator.start:self.navigator.stop + 1]):
@@ -249,7 +244,7 @@ class Display:
                                                f'{item.category and item.category.upper() or "N/A"} - {item.title} ({item.created})', attribute)
                 # render prompt
                 self.stdscr.addstr(0, 0, f'> {self.search_term}')
-            elif self.screen_state == ScreenState.ITEM:
+            elif self.model.screen_state == ScreenState.ITEM:
                 # render item content
                 item = self.data[self.navigator.selected]
                 self.stdscr.addstr(0, 0, Text.format(
@@ -258,7 +253,7 @@ class Display:
             # render status bar
             status_text = ''
             status_text += f'Page {self.navigator.current_page} / {self.navigator.total_pages}'
-            if self.screen_state == ScreenState.LIST_ARCHIVED:
+            if self.model.screen_state == ScreenState.LIST_ARCHIVED:
                 status_text = f'{status_text} (Archived)'
 
             # add command hints
