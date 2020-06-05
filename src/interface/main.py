@@ -34,7 +34,7 @@ class Display:
         # TODO switch these out for enums and classes
         command_objects = {
             'toggle_view': {
-                'command': self.toggle_view,
+                'command': self.model.toggle_view,
                 'hint': 'Toggle'
             },
             'delete_item': {
@@ -174,12 +174,6 @@ class Display:
     def confirm(self):
         if len(self.data) > 0:
             self.model.screen_state = ScreenState.ITEM
-
-    def toggle_view(self):
-        if self.model.screen_state == ScreenState.LIST_ACTIVE:
-            self.model.screen_state = ScreenState.LIST_ARCHIVED
-        elif self.model.screen_state == ScreenState.LIST_ARCHIVED:
-            self.model.screen_state = ScreenState.LIST_ACTIVE
 
     def next_item(self):
         self.navigator.next()
