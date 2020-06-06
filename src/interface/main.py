@@ -72,7 +72,7 @@ class Display:
                 'command': self.backspace
             },
             'go_back': {
-                'command': self.go_back,
+                'command': self.model.go_back,
                 'hint': 'back'
             }
         }
@@ -189,10 +189,6 @@ class Display:
 
     def backspace(self):
         self.search_term = self.search_term[:-1]
-
-    def go_back(self):
-        if self.model.screen_state == ScreenState.ITEM:
-            self.model.screen_state = ScreenState.LIST_ACTIVE
 
     def get_active_commands(self):
         return self.commands[self.model.screen_state]

@@ -17,6 +17,10 @@ class Model:
         elif self.__screen_state == ScreenState.LIST_ARCHIVED:
             self.__screen_state = ScreenState.LIST_ACTIVE
 
+    def go_back(self):
+        if self.screen_state == ScreenState.ITEM:
+            self.screen_state = ScreenState.LIST_ACTIVE
+
     @property
     def screen_state(self):
         return self.__screen_state
